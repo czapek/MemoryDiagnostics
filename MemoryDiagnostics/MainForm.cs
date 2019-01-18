@@ -14,8 +14,7 @@ namespace MemoryDiagnostics
 {
     public partial class MainForm : Form
     {
-        Dictionary<DateTime, Dictionary<String, List<ulong>>> snapshots = new Dictionary<DateTime, Dictionary<string, List<ulong>>>();
-        Dictionary<String, List<ulong>> lastSnapshot;
+        Dictionary<string, ManagedObject> lastSnapshot;
         Process process;
         int snapshotCnt = 0;
 
@@ -32,7 +31,7 @@ namespace MemoryDiagnostics
         private void StartWatching()
         {
             Process[] allProcesses = Process.GetProcesses();
-            process = allProcesses.FirstOrDefault(p => p.ProcessName.Contains("MediaBrowser"));
+            process = allProcesses.FirstOrDefault(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim()));
             NextSnapshot();
         }
 
@@ -44,35 +43,39 @@ namespace MemoryDiagnostics
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
-              
-                Dictionary<String, List<ulong>> meonaObjects = ListObjects(runtime, "MediaBrowser").OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+
+                Dictionary<string, ManagedObject> managedObjectsDic = ListObjects(runtime, textBoxObjectFilter.Text.Trim());
 
                 if (lastSnapshot != null)
                 {
-                    foreach (KeyValuePair<String, List<ulong>> kv in meonaObjects)
+                    foreach (ManagedObject mo in managedObjectsDic.Values)
                     {
-                        if (lastSnapshot.ContainsKey(kv.Key))
-                        {
-                            managedObjects.Add(new ManagedObject() { ObjectName = kv.Key, ObjectCount = kv.Value.Count, ObjectChange = kv.Value.Count - lastSnapshot[kv.Key].Count });
-                        }
-                        else
-                        {
-                            managedObjects.Add(new ManagedObject() { ObjectName = kv.Key, ObjectCount = kv.Value.Count, ObjectChange = kv.Value.Count });
-                        }
+                        mo.ObjectCount = mo.ObjectPtrs.Count;
+                        if (lastSnapshot.ContainsKey(mo.ObjectName))
+                            mo.ObjectCountLast = lastSnapshot[mo.ObjectName].ObjectPtrs.Count;
+
+                        if (!checkBoxChange.Checked || mo.ObjectChange > 0)
+                            managedObjects.Add(mo);
                     }
 
-                    foreach (KeyValuePair<String, List<ulong>> kv in lastSnapshot)
-                    {
-                        if (!meonaObjects.ContainsKey(kv.Key))
+                    if (!checkBoxChange.Checked)
+                        foreach (ManagedObject mo in lastSnapshot.Values)
                         {
-                            managedObjects.Add(new ManagedObject() { ObjectName = kv.Key, ObjectCount = kv.Value.Count, ObjectChange = kv.Value.Count });
+                            if (!managedObjectsDic.ContainsKey(mo.ObjectName))
+                            {
+                                mo.ObjectCountLast = mo.ObjectPtrs.Count;
+                                mo.ObjectCount = 0;
+                                managedObjects.Add(mo);
+                            }
                         }
-                    }
                 }
 
-                managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
-                lastSnapshot = meonaObjects;
-                snapshots.Add(DateTime.Now, meonaObjects);
+                if (checkBoxChange.Checked)
+                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
+                else
+                    managedObjects = managedObjects.OrderBy(x => x.ObjectName).ToList();
+
+                lastSnapshot = managedObjectsDic;
                 bindingSourceMain.DataSource = managedObjects;
             }
 
@@ -81,24 +84,30 @@ namespace MemoryDiagnostics
             snapshotCnt++;
         }
 
-        private static Dictionary<string, List<ulong>> ListObjects(ClrRuntime runtime, string startsWith)
+        private static Dictionary<string, ManagedObject> ListObjects(ClrRuntime runtime, string startsWith)
         {
-            Dictionary<String, List<ulong>> meonaObjects = new Dictionary<string, List<ulong>>();
+            Dictionary<String, ManagedObject> managedObjects = new Dictionary<string, ManagedObject>();
+
             if (runtime.Heap.CanWalkHeap)
             {
                 foreach (ulong ptr in runtime.Heap.EnumerateObjectAddresses())
                 {
                     ClrType type = runtime.Heap.GetObjectType(ptr);
-                    if (type != null && (startsWith == null || type.Name.StartsWith(startsWith)))
+                    if (type != null && (String.IsNullOrEmpty(startsWith) || type.Name.StartsWith(startsWith)))
                     {
-                        if (!meonaObjects.ContainsKey(type.Name))
-                            meonaObjects.Add(type.Name, new List<ulong>());
-
-                        meonaObjects[type.Name].Add(ptr);
+                        if (!managedObjects.ContainsKey(type.Name))
+                        {
+                            managedObjects.Add(type.Name, new ManagedObject()
+                            {
+                                ClrType = type,
+                                ObjectPtrs = new List<ulong>()
+                            });
+                        }
+                        managedObjects[type.Name].ObjectPtrs.Add(ptr);
                     }
                 }
             }
-            return meonaObjects;
+            return managedObjects;
         }
 
         private void buttonNext_Click(object sender, EventArgs e)
