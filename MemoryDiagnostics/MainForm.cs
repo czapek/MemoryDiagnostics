@@ -23,20 +23,33 @@ namespace MemoryDiagnostics
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        public MainForm(string[] args)
         {
-            StartWatching();
+            InitializeComponent();
+
+            if (args.Length > 0)
+                textBoxProcessFilter.Text = args[0];
+
+            if (args.Length > 1)
+                textBoxObjectFilter.Text = args[1];
         }
 
-        private void StartWatching()
+        private void Form1_Load(object sender, EventArgs e)
         {
-            Process[] allProcesses = Process.GetProcesses();
-            process = allProcesses.FirstOrDefault(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim()));
             NextSnapshot();
         }
 
         private void NextSnapshot()
         {
+            Process[] allProcesses = Process.GetProcesses();
+            process = allProcesses.FirstOrDefault(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim()));
+
+            if (process == null)
+            {
+                this.Text = "Process not found: " + textBoxObjectFilter.Text.Trim();
+                return;
+            }
+
             Cursor.Current = Cursors.WaitCursor;
             List<ManagedObject> managedObjects = new List<ManagedObject>();
             using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, 10000, AttachFlag.Passive))
@@ -73,7 +86,7 @@ namespace MemoryDiagnostics
                 if (checkBoxChange.Checked)
                     managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
                 else
-                    managedObjects = managedObjects.OrderBy(x => x.ObjectName).ToList();
+                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
 
                 lastSnapshot = managedObjectsDic;
                 bindingSourceMain.DataSource = managedObjects;
@@ -113,6 +126,29 @@ namespace MemoryDiagnostics
         private void buttonNext_Click(object sender, EventArgs e)
         {
             NextSnapshot();
+        }
+
+        int sortCnt = 0;
+        private void buttonSort_Click(object sender, EventArgs e)
+        {
+            List<ManagedObject> managedObjects = bindingSourceMain.DataSource as List<ManagedObject>;
+            if (managedObjects != null)
+            {
+                sortCnt++;
+                if (sortCnt > 3)
+                    sortCnt = 0;
+
+                if (sortCnt == 0)
+                    managedObjects = managedObjects.OrderBy(x => x.ObjectName).ToList();
+                if (sortCnt == 1)
+                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectName).ToList();
+                else if (sortCnt == 2)
+                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectCount).ToList();
+                else if (sortCnt == 3)
+                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
+
+                bindingSourceMain.DataSource = managedObjects;
+            }
         }
     }
 }
