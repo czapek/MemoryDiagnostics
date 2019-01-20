@@ -14,7 +14,6 @@ namespace MemoryDiagnostics
 {
     public partial class MainForm : Form
     {
-        SortedDictionary<string, ManagedObject> lastSnapshot;
         List<Snapshot> Snapshots = new List<Snapshot>();
         Process process;
         int snapshotCnt = 0;
@@ -58,13 +57,14 @@ namespace MemoryDiagnostics
             }
             catch (Exception ex)
             {
+                if (ex is ClrDiagnosticsException && process != null)
+                    MessageBox.Show("This tool have to be compiled for the same architecture as the aimed process " + process.ProcessName + " (32/64bit)", ex.Message);
                 this.Text = ex.Message;
             }
         }
 
         private void CreateManagedObjects()
         {
-            List<ManagedObject> managedObjectsCompare = new List<ManagedObject>();
             using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, 10000, AttachFlag.Passive))
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
@@ -74,50 +74,64 @@ namespace MemoryDiagnostics
                 CollectMemory(runtime, snapshot);
                 snapshot.ManagedObjectDic = ListObjects(runtime);
 
-                if (lastSnapshot != null)
-                {
-                    string filter = textBoxObjectFilter.Text.Trim();
+                if (Snapshots.Count > 1)
+                    CompareSnapshots(snapshot, Snapshots[Snapshots.Count - 2]);
 
-                    foreach (ManagedObject mo in snapshot.ManagedObjectDic.Values)
-                    {
-                        if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
-                            continue;
-
-                        mo.ObjectCount = mo.ObjectPtrs.Count;
-                        if (lastSnapshot.ContainsKey(mo.ObjectName))
-                            mo.ObjectCountLast = lastSnapshot[mo.ObjectName].ObjectPtrs.Count;
-
-                        if (!checkBoxChange.Checked || mo.ObjectChange > 0)
-                            managedObjectsCompare.Add(mo);
-                    }
-
-                    if (!checkBoxChange.Checked)
-                        foreach (ManagedObject mo in lastSnapshot.Values)
-                        {
-                            if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
-                                continue;
-
-                            if (!snapshot.ManagedObjectDic.ContainsKey(mo.ObjectName))
-                            {
-                                mo.ObjectCountLast = mo.ObjectPtrs.Count;
-                                mo.ObjectCount = 0;
-                                managedObjectsCompare.Add(mo);
-                            }
-                        }
-                }
-
-                if (checkBoxChange.Checked)
-                    managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
-                else
-                    managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
-
-                lastSnapshot = snapshot.ManagedObjectDic;
-                bindingSourceMain.DataSource = managedObjectsCompare;
                 bindingSourceSnapshot.DataSource = null;
-                bindingSourceSnapshot.DataSource = Snapshots;    
+                bindingSourceSnapshot.DataSource = Snapshots;
+                Regular.Visible = Snapshots.Sum(x => (long)x.MemoryRegular) > 0;
+                Reserved.Visible = Snapshots.Sum(x => (long)x.MemoryReserved) > 0;
             }
 
             this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotCnt, process.PrivateMemorySize64 / 1024);
+        }
+
+        Snapshot snapshot1Current;
+        Snapshot snapshot2Current;
+        private void CompareSnapshots(Snapshot snapshot1, Snapshot snapshot2)
+        {
+            if (snapshot1 == null || snapshot2 == null)
+                return;
+
+            snapshot1Current = snapshot1;
+            snapshot2Current = snapshot2;
+
+            string filter = textBoxObjectFilter.Text.Trim();
+            List<ManagedObject> managedObjectsCompare = new List<ManagedObject>();
+
+            foreach (ManagedObject mo in snapshot1.ManagedObjectDic.Values)
+            {
+                if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
+                    continue;
+
+                mo.ObjectCount = mo.ObjectPtrs.Count;
+                if (snapshot2.ManagedObjectDic.ContainsKey(mo.ObjectName))
+                    mo.ObjectCountLast = snapshot2.ManagedObjectDic[mo.ObjectName].ObjectPtrs.Count;
+
+                if (!checkBoxChange.Checked || mo.ObjectChange > 0)
+                    managedObjectsCompare.Add(mo);
+            }
+
+            if (!checkBoxChange.Checked)
+                foreach (ManagedObject mo in snapshot2.ManagedObjectDic.Values)
+                {
+                    if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
+                        continue;
+
+                    if (!snapshot1.ManagedObjectDic.ContainsKey(mo.ObjectName))
+                    {
+                        mo.ObjectCountLast = mo.ObjectPtrs.Count;
+                        mo.ObjectCount = 0;
+                        managedObjectsCompare.Add(mo);
+                    }
+                }
+
+            if (checkBoxChange.Checked)
+                managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
+            else
+                managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
+
+            bindingSourceMain.DataSource = managedObjectsCompare;
         }
 
         //https://github.com/Microsoft/clrmd/blob/master/Documentation/ClrRuntime.md
@@ -183,6 +197,30 @@ namespace MemoryDiagnostics
         private void buttonNext_Click(object sender, EventArgs e)
         {
             NextSnapshot();
+        }
+
+        private void dataGridViewSnapshot_DoubleClick(object sender, EventArgs e)
+        {
+            if (dataGridViewSnapshot.SelectedRows.Count > 0)
+            {
+                DataGridViewRow row = dataGridViewSnapshot.SelectedRows[0];
+                Snapshot s = row.DataBoundItem as Snapshot;
+
+                if (s != null && Snapshots.Count > 0)
+                    CompareSnapshots(Snapshots[Snapshots.Count - 1], s);
+            }
+
+        }
+
+        private void checkBoxChange_CheckedChanged(object sender, EventArgs e)
+        {
+            CompareSnapshots(snapshot1Current, snapshot2Current);
+        }
+
+        private void textBoxObjectFilter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+                CompareSnapshots(snapshot1Current, snapshot2Current);
         }
     }
 }
