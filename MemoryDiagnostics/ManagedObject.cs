@@ -12,6 +12,7 @@ namespace MemoryDiagnostics
         public string ObjectName { get { return ClrType.Name; } }
         public int ObjectCount { get; set; }
         public int ObjectCountLast { get; set; }
+        public ulong ObjectSize { get; set; }
         public int ObjectChange { get { return ObjectCount - ObjectCountLast; } }
         public List<ulong> ObjectPtrs { get; set; }
         public ClrType ClrType { get; set; }

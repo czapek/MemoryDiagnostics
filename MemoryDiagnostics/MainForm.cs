@@ -14,7 +14,8 @@ namespace MemoryDiagnostics
 {
     public partial class MainForm : Form
     {
-        Dictionary<string, ManagedObject> lastSnapshot;
+        SortedDictionary<string, ManagedObject> lastSnapshot;
+        List<Snapshot> Snapshots = new List<Snapshot>();
         Process process;
         int snapshotCnt = 0;
 
@@ -44,79 +45,135 @@ namespace MemoryDiagnostics
             Process[] allProcesses = Process.GetProcesses();
             process = allProcesses.FirstOrDefault(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim()));
 
-            if (process == null)
+            try
             {
-                this.Text = "Process not found: " + textBoxObjectFilter.Text.Trim();
-                return;
+                Cursor.Current = Cursors.WaitCursor;
+                CreateManagedObjects();
+                Cursor.Current = Cursors.Default;
+                snapshotCnt++;
             }
+            catch (NullReferenceException ex)
+            {
+                this.Text = "Process not found: " + textBoxProcessFilter.Text.Trim();
+            }
+            catch (Exception ex)
+            {
+                this.Text = ex.Message;
+            }
+        }
 
-            Cursor.Current = Cursors.WaitCursor;
-            List<ManagedObject> managedObjects = new List<ManagedObject>();
+        private void CreateManagedObjects()
+        {
+            List<ManagedObject> managedObjectsCompare = new List<ManagedObject>();
             using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, 10000, AttachFlag.Passive))
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
-
-                Dictionary<string, ManagedObject> managedObjectsDic = ListObjects(runtime, textBoxObjectFilter.Text.Trim());
+                Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };
+                Snapshots.Add(snapshot);
+                CollectMemory(runtime, snapshot);
+                snapshot.ManagedObjectDic = ListObjects(runtime);
 
                 if (lastSnapshot != null)
                 {
-                    foreach (ManagedObject mo in managedObjectsDic.Values)
+                    string filter = textBoxObjectFilter.Text.Trim();
+
+                    foreach (ManagedObject mo in snapshot.ManagedObjectDic.Values)
                     {
+                        if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
+                            continue;
+
                         mo.ObjectCount = mo.ObjectPtrs.Count;
                         if (lastSnapshot.ContainsKey(mo.ObjectName))
                             mo.ObjectCountLast = lastSnapshot[mo.ObjectName].ObjectPtrs.Count;
 
                         if (!checkBoxChange.Checked || mo.ObjectChange > 0)
-                            managedObjects.Add(mo);
+                            managedObjectsCompare.Add(mo);
                     }
 
                     if (!checkBoxChange.Checked)
                         foreach (ManagedObject mo in lastSnapshot.Values)
                         {
-                            if (!managedObjectsDic.ContainsKey(mo.ObjectName))
+                            if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
+                                continue;
+
+                            if (!snapshot.ManagedObjectDic.ContainsKey(mo.ObjectName))
                             {
                                 mo.ObjectCountLast = mo.ObjectPtrs.Count;
                                 mo.ObjectCount = 0;
-                                managedObjects.Add(mo);
+                                managedObjectsCompare.Add(mo);
                             }
                         }
                 }
 
                 if (checkBoxChange.Checked)
-                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
+                    managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
                 else
-                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
+                    managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
 
-                lastSnapshot = managedObjectsDic;
-                bindingSourceMain.DataSource = managedObjects;
+                lastSnapshot = snapshot.ManagedObjectDic;
+                bindingSourceMain.DataSource = managedObjectsCompare;
+                bindingSourceSnapshot.DataSource = null;
+                bindingSourceSnapshot.DataSource = Snapshots;    
             }
 
-            this.Text = snapshotCnt + ". Snapshot";
-            Cursor.Current = Cursors.Default;
-            snapshotCnt++;
+            this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotCnt, process.PrivateMemorySize64 / 1024);
         }
 
-        private static Dictionary<string, ManagedObject> ListObjects(ClrRuntime runtime, string startsWith)
+        //https://github.com/Microsoft/clrmd/blob/master/Documentation/ClrRuntime.md
+        private static void CollectMemory(ClrRuntime runtime, Snapshot s)
         {
-            Dictionary<String, ManagedObject> managedObjects = new Dictionary<string, ManagedObject>();
+            foreach (ClrMemoryRegion r in runtime.EnumerateMemoryRegions())
+            {
+                if (r.Type == ClrMemoryRegionType.GCSegment)
+                {
+                    if (r.GCSegmentType == GCSegmentType.Ephemeral)
+                        s.MemoryEphemeral += r.Size;
+
+                    if (r.GCSegmentType == GCSegmentType.LargeObject)
+                        s.MemoryLargeObject += r.Size;
+
+                    if (r.GCSegmentType == GCSegmentType.Regular)
+                        s.MemoryRegular += r.Size;
+                }
+                else if (r.Type == ClrMemoryRegionType.ReservedGCSegment)
+                {
+                    s.MemoryReserved += r.Size;
+                }
+                else
+                {
+                    s.MemoryOther += r.Size;
+                }
+            }
+        }
+
+        private static SortedDictionary<string, ManagedObject> ListObjects(ClrRuntime runtime)
+        {
+            SortedDictionary<String, ManagedObject> managedObjects = new SortedDictionary<string, ManagedObject>();
 
             if (runtime.Heap.CanWalkHeap)
             {
                 foreach (ulong ptr in runtime.Heap.EnumerateObjectAddresses())
                 {
                     ClrType type = runtime.Heap.GetObjectType(ptr);
-                    if (type != null && (String.IsNullOrEmpty(startsWith) || type.Name.StartsWith(startsWith)))
+                    if (type != null)
                     {
+                        ManagedObject mo = null;
                         if (!managedObjects.ContainsKey(type.Name))
                         {
-                            managedObjects.Add(type.Name, new ManagedObject()
+                            mo = new ManagedObject()
                             {
                                 ClrType = type,
                                 ObjectPtrs = new List<ulong>()
-                            });
+                            };
+                            managedObjects.Add(type.Name, mo);
                         }
-                        managedObjects[type.Name].ObjectPtrs.Add(ptr);
+
+                        if (mo == null)
+                            mo = managedObjects[type.Name];
+
+                        mo.ObjectPtrs.Add(ptr);
+                        mo.ObjectSize += type.GetSize(ptr);
                     }
                 }
             }
@@ -126,29 +183,6 @@ namespace MemoryDiagnostics
         private void buttonNext_Click(object sender, EventArgs e)
         {
             NextSnapshot();
-        }
-
-        int sortCnt = 0;
-        private void buttonSort_Click(object sender, EventArgs e)
-        {
-            List<ManagedObject> managedObjects = bindingSourceMain.DataSource as List<ManagedObject>;
-            if (managedObjects != null)
-            {
-                sortCnt++;
-                if (sortCnt > 3)
-                    sortCnt = 0;
-
-                if (sortCnt == 0)
-                    managedObjects = managedObjects.OrderBy(x => x.ObjectName).ToList();
-                if (sortCnt == 1)
-                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectName).ToList();
-                else if (sortCnt == 2)
-                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectCount).ToList();
-                else if (sortCnt == 3)
-                    managedObjects = managedObjects.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
-
-                bindingSourceMain.DataSource = managedObjects;
-            }
         }
     }
 }
