@@ -29,25 +29,26 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle49 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle50 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle51 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle52 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle53 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle54 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle55 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle56 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle57 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle58 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle59 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle60 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.dataGridViewMain = new System.Windows.Forms.DataGridView();
             this.OjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectSizeFormat = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectChange = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectCountLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.contextMenuStripMeomoryObjects = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.contextMenuStripMemoryObjects = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.filterForSelectedTypesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyObjectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -78,7 +79,7 @@
             this.saveFileDialogSnapshot = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialogSnapshot = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
-            this.contextMenuStripMeomoryObjects.SuspendLayout();
+            this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSnapshot)).BeginInit();
             this.contextMenuStripSnapshot.SuspendLayout();
@@ -103,7 +104,7 @@
             this.ObjectCount,
             this.ObjectChange,
             this.ObjectCountLast});
-            this.dataGridViewMain.ContextMenuStrip = this.contextMenuStripMeomoryObjects;
+            this.dataGridViewMain.ContextMenuStrip = this.contextMenuStripMemoryObjects;
             this.dataGridViewMain.DataSource = this.bindingSourceMain;
             this.dataGridViewMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewMain.Location = new System.Drawing.Point(0, 0);
@@ -128,8 +129,8 @@
             // 
             this.ObjectSizeFormat.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.ObjectSizeFormat.DataPropertyName = "ObjectSize";
-            dataGridViewCellStyle49.Format = "n0";
-            this.ObjectSizeFormat.DefaultCellStyle = dataGridViewCellStyle49;
+            dataGridViewCellStyle25.Format = "n0";
+            this.ObjectSizeFormat.DefaultCellStyle = dataGridViewCellStyle25;
             this.ObjectSizeFormat.HeaderText = "Bytes";
             this.ObjectSizeFormat.Name = "ObjectSizeFormat";
             this.ObjectSizeFormat.ReadOnly = true;
@@ -138,8 +139,8 @@
             // ObjectCount
             // 
             this.ObjectCount.DataPropertyName = "ObjectCount";
-            dataGridViewCellStyle50.Format = "n0";
-            this.ObjectCount.DefaultCellStyle = dataGridViewCellStyle50;
+            dataGridViewCellStyle26.Format = "n0";
+            this.ObjectCount.DefaultCellStyle = dataGridViewCellStyle26;
             this.ObjectCount.HeaderText = "Count";
             this.ObjectCount.Name = "ObjectCount";
             this.ObjectCount.ReadOnly = true;
@@ -148,8 +149,8 @@
             // ObjectChange
             // 
             this.ObjectChange.DataPropertyName = "ObjectChange";
-            dataGridViewCellStyle51.Format = "n0";
-            this.ObjectChange.DefaultCellStyle = dataGridViewCellStyle51;
+            dataGridViewCellStyle27.Format = "n0";
+            this.ObjectChange.DefaultCellStyle = dataGridViewCellStyle27;
             this.ObjectChange.HeaderText = "Change";
             this.ObjectChange.Name = "ObjectChange";
             this.ObjectChange.ReadOnly = true;
@@ -158,40 +159,40 @@
             // ObjectCountLast
             // 
             this.ObjectCountLast.DataPropertyName = "ObjectCountLast";
-            dataGridViewCellStyle52.Format = "n0";
-            this.ObjectCountLast.DefaultCellStyle = dataGridViewCellStyle52;
+            dataGridViewCellStyle28.Format = "n0";
+            this.ObjectCountLast.DefaultCellStyle = dataGridViewCellStyle28;
             this.ObjectCountLast.HeaderText = "Last";
             this.ObjectCountLast.Name = "ObjectCountLast";
             this.ObjectCountLast.ReadOnly = true;
             this.ObjectCountLast.Width = 60;
             // 
-            // contextMenuStripMeomoryObjects
+            // contextMenuStripMemoryObjects
             // 
-            this.contextMenuStripMeomoryObjects.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contextMenuStripMemoryObjects.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.filterForSelectedTypesToolStripMenuItem,
             this.clearFilterToolStripMenuItem,
             this.copyObjectNameToolStripMenuItem});
-            this.contextMenuStripMeomoryObjects.Name = "contextMenuStripMeomoryObjects";
-            this.contextMenuStripMeomoryObjects.Size = new System.Drawing.Size(196, 70);
+            this.contextMenuStripMemoryObjects.Name = "contextMenuStripMeomoryObjects";
+            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(215, 70);
             // 
             // filterForSelectedTypesToolStripMenuItem
             // 
             this.filterForSelectedTypesToolStripMenuItem.Name = "filterForSelectedTypesToolStripMenuItem";
-            this.filterForSelectedTypesToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.filterForSelectedTypesToolStripMenuItem.Text = "Filter for selected types";
+            this.filterForSelectedTypesToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.filterForSelectedTypesToolStripMenuItem.Text = "Add selected types to filter";
             this.filterForSelectedTypesToolStripMenuItem.Click += new System.EventHandler(this.filterForSelectedTypesToolStripMenuItem_Click);
             // 
             // clearFilterToolStripMenuItem
             // 
             this.clearFilterToolStripMenuItem.Name = "clearFilterToolStripMenuItem";
-            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
             this.clearFilterToolStripMenuItem.Text = "Clear Filter";
             this.clearFilterToolStripMenuItem.Click += new System.EventHandler(this.clearFilterToolStripMenuItem_Click);
             // 
             // copyObjectNameToolStripMenuItem
             // 
             this.copyObjectNameToolStripMenuItem.Name = "copyObjectNameToolStripMenuItem";
-            this.copyObjectNameToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.copyObjectNameToolStripMenuItem.Size = new System.Drawing.Size(216, 22);
             this.copyObjectNameToolStripMenuItem.Text = "Copy Object Name";
             this.copyObjectNameToolStripMenuItem.Click += new System.EventHandler(this.copyObjectNameToolStripMenuItem_Click);
             // 
@@ -299,8 +300,8 @@
             // 
             this.Date.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Date.DataPropertyName = "Date";
-            dataGridViewCellStyle53.Format = "HH:mm:ss";
-            this.Date.DefaultCellStyle = dataGridViewCellStyle53;
+            dataGridViewCellStyle29.Format = "HH:mm:ss";
+            this.Date.DefaultCellStyle = dataGridViewCellStyle29;
             this.Date.HeaderText = "Time";
             this.Date.Name = "Date";
             this.Date.ReadOnly = true;
@@ -310,8 +311,8 @@
             // 
             this.PrivateBytes.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.PrivateBytes.DataPropertyName = "MemoryPrivateBytes";
-            dataGridViewCellStyle54.Format = "n0";
-            this.PrivateBytes.DefaultCellStyle = dataGridViewCellStyle54;
+            dataGridViewCellStyle30.Format = "n0";
+            this.PrivateBytes.DefaultCellStyle = dataGridViewCellStyle30;
             this.PrivateBytes.HeaderText = "PrivateBytes";
             this.PrivateBytes.Name = "PrivateBytes";
             this.PrivateBytes.ReadOnly = true;
@@ -321,8 +322,8 @@
             // 
             this.ObjectAllCount.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.ObjectAllCount.DataPropertyName = "ObjectCount";
-            dataGridViewCellStyle55.Format = "n0";
-            this.ObjectAllCount.DefaultCellStyle = dataGridViewCellStyle55;
+            dataGridViewCellStyle31.Format = "n0";
+            this.ObjectAllCount.DefaultCellStyle = dataGridViewCellStyle31;
             this.ObjectAllCount.HeaderText = "Objects";
             this.ObjectAllCount.Name = "ObjectAllCount";
             this.ObjectAllCount.ReadOnly = true;
@@ -332,8 +333,8 @@
             // 
             this.MemoryEphemeral.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.MemoryEphemeral.DataPropertyName = "MemoryEphemeral";
-            dataGridViewCellStyle56.Format = "n0";
-            this.MemoryEphemeral.DefaultCellStyle = dataGridViewCellStyle56;
+            dataGridViewCellStyle32.Format = "n0";
+            this.MemoryEphemeral.DefaultCellStyle = dataGridViewCellStyle32;
             this.MemoryEphemeral.HeaderText = "Ephemeral";
             this.MemoryEphemeral.Name = "MemoryEphemeral";
             this.MemoryEphemeral.ReadOnly = true;
@@ -343,8 +344,8 @@
             // 
             this.MemoryLargeObject.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.MemoryLargeObject.DataPropertyName = "MemoryLargeObject";
-            dataGridViewCellStyle57.Format = "n0";
-            this.MemoryLargeObject.DefaultCellStyle = dataGridViewCellStyle57;
+            dataGridViewCellStyle33.Format = "n0";
+            this.MemoryLargeObject.DefaultCellStyle = dataGridViewCellStyle33;
             this.MemoryLargeObject.HeaderText = "LargeObject";
             this.MemoryLargeObject.Name = "MemoryLargeObject";
             this.MemoryLargeObject.ReadOnly = true;
@@ -354,8 +355,8 @@
             // 
             this.Regular.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Regular.DataPropertyName = "MemoryRegular";
-            dataGridViewCellStyle58.Format = "n0";
-            this.Regular.DefaultCellStyle = dataGridViewCellStyle58;
+            dataGridViewCellStyle34.Format = "n0";
+            this.Regular.DefaultCellStyle = dataGridViewCellStyle34;
             this.Regular.HeaderText = "Regular";
             this.Regular.Name = "Regular";
             this.Regular.ReadOnly = true;
@@ -365,8 +366,8 @@
             // 
             this.Reserved.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Reserved.DataPropertyName = "MemoryReserved";
-            dataGridViewCellStyle59.Format = "n0";
-            this.Reserved.DefaultCellStyle = dataGridViewCellStyle59;
+            dataGridViewCellStyle35.Format = "n0";
+            this.Reserved.DefaultCellStyle = dataGridViewCellStyle35;
             this.Reserved.HeaderText = "Reserved";
             this.Reserved.Name = "Reserved";
             this.Reserved.ReadOnly = true;
@@ -376,8 +377,8 @@
             // 
             this.Other.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Other.DataPropertyName = "MemoryOther";
-            dataGridViewCellStyle60.Format = "n0";
-            this.Other.DefaultCellStyle = dataGridViewCellStyle60;
+            dataGridViewCellStyle36.Format = "n0";
+            this.Other.DefaultCellStyle = dataGridViewCellStyle36;
             this.Other.HeaderText = "Other";
             this.Other.Name = "Other";
             this.Other.ReadOnly = true;
@@ -473,13 +474,14 @@
             this.Controls.Add(this.buttonLoad);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.buttonNext);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MinimumSize = new System.Drawing.Size(1000, 500);
             this.Name = "MainForm";
             this.Text = "MemoryDiagnostics";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).EndInit();
-            this.contextMenuStripMeomoryObjects.ResumeLayout(false);
+            this.contextMenuStripMemoryObjects.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewSnapshot)).EndInit();
             this.contextMenuStripSnapshot.ResumeLayout(false);
@@ -514,7 +516,7 @@
         private System.Windows.Forms.ToolStripMenuItem compareWithThisSnapshotDoubleClickToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem selectThisSnapshotToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainerMain;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStripMeomoryObjects;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripMemoryObjects;
         private System.Windows.Forms.ToolStripMenuItem filterForSelectedTypesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearFilterToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Snapshot;

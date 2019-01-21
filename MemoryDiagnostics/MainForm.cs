@@ -108,7 +108,7 @@ namespace MemoryDiagnostics
             snapshot2Current = snapshot2;
 
             string filter = textBoxObjectFilter.Text.Trim();
-            List<ManagedObject> managedObjectsCompare = new List<ManagedObject>();
+            SortableBindingList<ManagedObject> managedObjectsCompare = new SortableBindingList<ManagedObject>();
 
             foreach (ManagedObject mo in snapshot1.ManagedObjectDic.Values)
             {
@@ -139,13 +139,7 @@ namespace MemoryDiagnostics
                     }
                 }
 
-            if (checkBoxChange.Checked)
-                managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange).ThenBy(x => x.ObjectName).ToList();
-            else
-                managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
-
             bindingSourceMain.DataSource = managedObjectsCompare;
-
             dataGridViewSnapshot.ClearSelection();
             dataGridViewSnapshot.Rows[Snapshots.FindIndex(x => x.Date == snapshot2.Date)].Selected = true;
         }
@@ -390,8 +384,7 @@ namespace MemoryDiagnostics
         }
 
         private void filterForSelectedTypesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            typeFilter.Clear();
+        {   
             foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
             {
                 ManagedObject m = row.DataBoundItem as ManagedObject;
