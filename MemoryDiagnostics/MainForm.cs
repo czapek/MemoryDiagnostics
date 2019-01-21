@@ -74,16 +74,20 @@ namespace MemoryDiagnostics
                 CollectMemory(runtime, snapshot);
                 snapshot.ManagedObjectDic = ListObjects(runtime);
 
-                if (Snapshots.Count > 1)
-                    CompareSnapshots(snapshot, Snapshots[Snapshots.Count - 2]);
-
                 bindingSourceSnapshot.DataSource = null;
                 bindingSourceSnapshot.DataSource = Snapshots;
                 Regular.Visible = Snapshots.Sum(x => (long)x.MemoryRegular) > 0;
                 Reserved.Visible = Snapshots.Sum(x => (long)x.MemoryReserved) > 0;
+
+                if (Snapshots.Count > 1)
+                    CompareSnapshots(snapshot, Snapshots[Snapshots.Count - 2]);
+                else
+                    CompareSnapshots(snapshot, snapshot);
             }
 
             this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotCnt, process.PrivateMemorySize64 / 1024);
+            splitContainerMain.SplitterDistance = dataGridViewSnapshot.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible).Sum(x => x.Width) + 6;
+
         }
 
         Snapshot snapshot1Current;
@@ -108,7 +112,8 @@ namespace MemoryDiagnostics
                 if (snapshot2.ManagedObjectDic.ContainsKey(mo.ObjectName))
                     mo.ObjectCountLast = snapshot2.ManagedObjectDic[mo.ObjectName].ObjectPtrs.Count;
 
-                if (!checkBoxChange.Checked || mo.ObjectChange > 0)
+                if ((!checkBoxChange.Checked || mo.ObjectChange > 0)
+                    && (typeFilter.Count == 0 || typeFilter.Contains(mo.ObjectName)))
                     managedObjectsCompare.Add(mo);
             }
 
@@ -118,7 +123,8 @@ namespace MemoryDiagnostics
                     if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
                         continue;
 
-                    if (!snapshot1.ManagedObjectDic.ContainsKey(mo.ObjectName))
+                    if (!snapshot1.ManagedObjectDic.ContainsKey(mo.ObjectName)
+                        && (typeFilter.Count == 0 || typeFilter.Contains(mo.ObjectName)))
                     {
                         mo.ObjectCountLast = mo.ObjectPtrs.Count;
                         mo.ObjectCount = 0;
@@ -133,7 +139,7 @@ namespace MemoryDiagnostics
 
             bindingSourceMain.DataSource = managedObjectsCompare;
 
-            dataGridViewSnapshot.ClearSelection();   
+            dataGridViewSnapshot.ClearSelection();
             dataGridViewSnapshot.Rows[Snapshots.FindIndex(x => x.Date == snapshot2.Date)].Selected = true;
         }
 
@@ -328,7 +334,21 @@ namespace MemoryDiagnostics
                     e.CellStyle.SelectionBackColor = Color.DarkRed;
                 }
             }
-        }       
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("ObjectAllCount"))
+            {
+                if (snapshotPrev.ObjectCount > snapshot.ObjectCount)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.ObjectCount < snapshot.ObjectCount)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+        }
 
         private void compareWithThisSnapshotDoubleClickToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -359,6 +379,35 @@ namespace MemoryDiagnostics
                     dataGridViewSnapshot.ClearSelection();
                     dataGridViewSnapshot.Rows[hti.RowIndex].Selected = true;
                 }
+            }
+        }
+
+        private void filterForSelectedTypesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            typeFilter.Clear();
+            foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
+            {
+                ManagedObject m = row.DataBoundItem as ManagedObject;
+                if (m != null)
+                    typeFilter.Add(m.ObjectName);
+            }
+            CompareSnapshots(snapshot1Current, snapshot2Current);
+        }
+
+        List<string> typeFilter = new List<string>();
+        private void clearFilterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            typeFilter.Clear();
+            CompareSnapshots(snapshot1Current, snapshot2Current);
+        }
+
+        private void copyObjectNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewMain.SelectedRows.Count > 0)
+            {
+                ManagedObject m = dataGridViewMain.SelectedRows[0].DataBoundItem as ManagedObject;
+                if (m != null)
+                    Clipboard.SetText(m.ObjectName);
             }
         }
     }

@@ -9,6 +9,7 @@ namespace MemoryDiagnostics
     public class Snapshot
     {
         public SortedDictionary<string, ManagedObject> ManagedObjectDic { get; set; }
+        public int ObjectCount { get { return ManagedObjectDic.Count; } }
         public int Position { get; set; }
         public ulong MemoryEphemeral { get; set; }
         public ulong MemoryLargeObject { get; set; }
