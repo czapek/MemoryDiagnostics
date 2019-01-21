@@ -5,7 +5,9 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -73,21 +75,26 @@ namespace MemoryDiagnostics
                 Snapshots.Add(snapshot);
                 CollectMemory(runtime, snapshot);
                 snapshot.ManagedObjectDic = ListObjects(runtime);
-
-                bindingSourceSnapshot.DataSource = null;
-                bindingSourceSnapshot.DataSource = Snapshots;
-                Regular.Visible = Snapshots.Sum(x => (long)x.MemoryRegular) > 0;
-                Reserved.Visible = Snapshots.Sum(x => (long)x.MemoryReserved) > 0;
-
-                if (Snapshots.Count > 1)
-                    CompareSnapshots(snapshot, Snapshots[Snapshots.Count - 2]);
-                else
-                    CompareSnapshots(snapshot, snapshot);
+                RefreshSnapshotGrid(snapshot);
             }
+        }
 
-            this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotCnt, process.PrivateMemorySize64 / 1024);
+        private void RefreshSnapshotGrid(Snapshot selectedSnapshot)
+        {
+            bindingSourceSnapshot.DataSource = null;
+            bindingSourceSnapshot.DataSource = Snapshots;
+            Regular.Visible = Snapshots.Sum(x => (long)x.MemoryRegular) > 0;
+            Reserved.Visible = Snapshots.Sum(x => (long)x.MemoryReserved) > 0;
+
+            if (Snapshots.Count > 1)
+                CompareSnapshots(selectedSnapshot, Snapshots[Snapshots.Count - 2]);
+            else
+                CompareSnapshots(selectedSnapshot, selectedSnapshot);
+
+
+            snapshotCnt = Snapshots.FindIndex(x => x.Date == selectedSnapshot.Date);
+            this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotCnt, selectedSnapshot.MemoryPrivateBytes / 1024);
             splitContainerMain.SplitterDistance = dataGridViewSnapshot.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible).Sum(x => x.Width) + 6;
-
         }
 
         Snapshot snapshot1Current;
@@ -186,7 +193,7 @@ namespace MemoryDiagnostics
                         {
                             mo = new ManagedObject()
                             {
-                                ClrType = type,
+                                ObjectName = type.Name,
                                 ObjectPtrs = new List<ulong>()
                             };
                             managedObjects.Add(type.Name, mo);
@@ -408,6 +415,43 @@ namespace MemoryDiagnostics
                 ManagedObject m = dataGridViewMain.SelectedRows[0].DataBoundItem as ManagedObject;
                 if (m != null)
                     Clipboard.SetText(m.ObjectName);
+            }
+        }
+
+        private void buttonSave_Click(object sender, EventArgs e)
+        {
+            saveFileDialogSnapshot.FileName = String.Format($"clrmd_{DateTime.Now:yyyyMMdd_HHmmss}");
+            saveFileDialogSnapshot.ShowDialog();
+            try
+            {
+                using (FileStream writerFileStream = new FileStream(saveFileDialogSnapshot.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(writerFileStream, Snapshots);                    
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void buttonLoad_Click(object sender, EventArgs e)
+        {
+            openFileDialogSnapshot.ShowDialog();
+            try
+            {
+                using (FileStream readerFileStream = new FileStream(openFileDialogSnapshot.FileName, FileMode.Open, FileAccess.Read))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    Snapshots = (List<Snapshot>)formatter.Deserialize(readerFileStream);                   
+                    if (Snapshots.Count > 0)
+                        RefreshSnapshotGrid(Snapshots[Snapshots.Count - 1]);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
     }

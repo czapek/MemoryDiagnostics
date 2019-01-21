@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MemoryDiagnostics
 {
+    [Serializable]
     public class Snapshot
     {
         public SortedDictionary<string, ManagedObject> ManagedObjectDic { get; set; }
@@ -18,5 +19,10 @@ namespace MemoryDiagnostics
         public ulong MemoryOther { get; set; }
         public long MemoryPrivateBytes { get; set; }
         public DateTime Date { get; set; }
+
+        public override string ToString()
+        {
+            return Position + ". " +  Date.ToString("HH:mm:ss");
+        }
     }
 }
