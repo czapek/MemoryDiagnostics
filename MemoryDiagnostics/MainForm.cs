@@ -222,5 +222,105 @@ namespace MemoryDiagnostics
             if(e.KeyCode == Keys.Enter)
                 CompareSnapshots(snapshot1Current, snapshot2Current);
         }
+
+        private void dataGridViewSnapshot_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            Snapshot snapshot = dataGridViewSnapshot.Rows[e.RowIndex].DataBoundItem as Snapshot;
+            if (snapshot == null)
+                return;
+
+            int index = Snapshots.FindIndex(x => x.Date == snapshot.Date);
+
+            Snapshot snapshotPrev = null;
+            if (index > 0)
+                snapshotPrev = Snapshots[index - 1];
+
+            if (snapshotPrev == null)
+                return;
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("PrivateBytes"))
+            {
+                if (snapshotPrev.MemoryPrivateBytes > snapshot.MemoryPrivateBytes)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.MemoryPrivateBytes < snapshot.MemoryPrivateBytes)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("MemoryEphemeral"))
+            {
+                if (snapshotPrev.MemoryEphemeral > snapshot.MemoryEphemeral)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.MemoryEphemeral < snapshot.MemoryEphemeral)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("MemoryLargeObject"))
+            {
+                if (snapshotPrev.MemoryLargeObject > snapshot.MemoryLargeObject)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.MemoryLargeObject < snapshot.MemoryLargeObject)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("Regular"))
+            {
+                if (snapshotPrev.MemoryRegular > snapshot.MemoryRegular)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.MemoryRegular < snapshot.MemoryRegular)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("Reserved"))
+            {
+                if (snapshotPrev.MemoryReserved > snapshot.MemoryReserved)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.MemoryReserved < snapshot.MemoryReserved)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+
+            if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("Other"))
+            {
+                if (snapshotPrev.MemoryOther > snapshot.MemoryOther)
+                {
+                    e.CellStyle.BackColor = Color.LightGreen;
+                    e.CellStyle.SelectionBackColor = Color.DarkGreen;
+                }
+                else if (snapshotPrev.MemoryOther < snapshot.MemoryOther)
+                {
+                    e.CellStyle.BackColor = Color.LightCoral;
+                    e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+        }
     }
 }
