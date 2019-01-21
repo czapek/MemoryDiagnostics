@@ -132,6 +132,9 @@ namespace MemoryDiagnostics
                 managedObjectsCompare = managedObjectsCompare.OrderByDescending(x => x.ObjectChange > 0).ThenBy(x => x.ObjectChange == 0).ThenByDescending(x => x.ObjectChange < 0).ThenBy(x => x.ObjectName).ToList();
 
             bindingSourceMain.DataSource = managedObjectsCompare;
+
+            dataGridViewSnapshot.ClearSelection();   
+            dataGridViewSnapshot.Rows[Snapshots.FindIndex(x => x.Date == snapshot2.Date)].Selected = true;
         }
 
         //https://github.com/Microsoft/clrmd/blob/master/Documentation/ClrRuntime.md
@@ -201,6 +204,11 @@ namespace MemoryDiagnostics
 
         private void dataGridViewSnapshot_DoubleClick(object sender, EventArgs e)
         {
+            CompareWithThisSnapshot();
+        }
+
+        private void CompareWithThisSnapshot()
+        {
             if (dataGridViewSnapshot.SelectedRows.Count > 0)
             {
                 DataGridViewRow row = dataGridViewSnapshot.SelectedRows[0];
@@ -209,7 +217,6 @@ namespace MemoryDiagnostics
                 if (s != null && Snapshots.Count > 0)
                     CompareSnapshots(Snapshots[Snapshots.Count - 1], s);
             }
-
         }
 
         private void checkBoxChange_CheckedChanged(object sender, EventArgs e)
@@ -219,7 +226,7 @@ namespace MemoryDiagnostics
 
         private void textBoxObjectFilter_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
                 CompareSnapshots(snapshot1Current, snapshot2Current);
         }
 
@@ -319,6 +326,38 @@ namespace MemoryDiagnostics
                 {
                     e.CellStyle.BackColor = Color.LightCoral;
                     e.CellStyle.SelectionBackColor = Color.DarkRed;
+                }
+            }
+        }       
+
+        private void compareWithThisSnapshotDoubleClickToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompareWithThisSnapshot();
+        }
+
+        private void selectThisSnapshotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewSnapshot.SelectedRows.Count > 0)
+            {
+                Snapshot s = dataGridViewSnapshot.SelectedRows[0].DataBoundItem as Snapshot;
+                if (s != null)
+                {
+                    int index = Snapshots.FindIndex(x => x.Date == s.Date);
+                    CompareSnapshots(s, snapshot2Current);
+                    this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", index, s.MemoryPrivateBytes / 1024);
+                }
+            }
+        }
+
+        private void dataGridViewSnapshot_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var hti = dataGridViewSnapshot.HitTest(e.X, e.Y);
+                if (hti.RowIndex >= 0)
+                {
+                    dataGridViewSnapshot.ClearSelection();
+                    dataGridViewSnapshot.Rows[hti.RowIndex].Selected = true;
                 }
             }
         }
