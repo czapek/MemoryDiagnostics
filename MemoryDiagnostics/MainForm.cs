@@ -18,7 +18,7 @@ namespace MemoryDiagnostics
     {
         List<Snapshot> Snapshots = new List<Snapshot>();
         Process process;
-        int snapshotCnt = 0;
+        int snapshotPosition = 0;
 
         public MainForm()
         {
@@ -50,8 +50,7 @@ namespace MemoryDiagnostics
             {
                 Cursor.Current = Cursors.WaitCursor;
                 CreateManagedObjects();
-                Cursor.Current = Cursors.Default;
-                snapshotCnt++;
+                Cursor.Current = Cursors.Default;                
             }
             catch (NullReferenceException ex)
             {
@@ -71,8 +70,11 @@ namespace MemoryDiagnostics
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
-                Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };
+                if (Snapshots.Count > 0) Snapshots[snapshotPosition].Comment = richTextBoxComment.Text;
+                Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };                
                 Snapshots.Add(snapshot);
+                snapshotPosition = Snapshots.Count - 1;
+                richTextBoxComment.Text = snapshotPosition + ". Snapshot Comment: ";
                 CollectMemory(runtime, snapshot);
                 snapshot.ManagedObjectDic = ListObjects(runtime);
                 RefreshSnapshotGrid(snapshot);
@@ -91,9 +93,8 @@ namespace MemoryDiagnostics
             else
                 CompareSnapshots(selectedSnapshot, selectedSnapshot);
 
-
-            snapshotCnt = Snapshots.FindIndex(x => x.Date == selectedSnapshot.Date);
-            this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotCnt, selectedSnapshot.MemoryPrivateBytes / 1024);
+            snapshotPosition = Snapshots.FindIndex(x => x.Date == selectedSnapshot.Date);
+            this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotPosition, selectedSnapshot.MemoryPrivateBytes / 1024);
             splitContainerMain.SplitterDistance = dataGridViewSnapshot.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible).Sum(x => x.Width) + 6;
         }
 
@@ -115,9 +116,8 @@ namespace MemoryDiagnostics
                 if (filter.Length != 0 && !mo.ObjectName.Contains(filter))
                     continue;
 
-                mo.ObjectCount = mo.ObjectPtrs.Count;
                 if (snapshot2.ManagedObjectDic.ContainsKey(mo.ObjectName))
-                    mo.ObjectCountLast = snapshot2.ManagedObjectDic[mo.ObjectName].ObjectPtrs.Count;
+                    mo.ObjectCountLast = snapshot2.ManagedObjectDic[mo.ObjectName].ObjectCount;
 
                 if ((!checkBoxChange.Checked || mo.ObjectChange > 0)
                     && (typeFilter.Count == 0 || typeFilter.Contains(mo.ObjectName)))
@@ -133,7 +133,7 @@ namespace MemoryDiagnostics
                     if (!snapshot1.ManagedObjectDic.ContainsKey(mo.ObjectName)
                         && (typeFilter.Count == 0 || typeFilter.Contains(mo.ObjectName)))
                     {
-                        mo.ObjectCountLast = mo.ObjectPtrs.Count;
+                        mo.ObjectCountLast = mo.ObjectCount;
                         mo.ObjectCount = 0;
                         managedObjectsCompare.Add(mo);
                     }
@@ -187,8 +187,7 @@ namespace MemoryDiagnostics
                         {
                             mo = new ManagedObject()
                             {
-                                ObjectName = type.Name,
-                                ObjectPtrs = new List<ulong>()
+                                ObjectName = type.Name         
                             };
                             managedObjects.Add(type.Name, mo);
                         }
@@ -196,7 +195,7 @@ namespace MemoryDiagnostics
                         if (mo == null)
                             mo = managedObjects[type.Name];
 
-                        mo.ObjectPtrs.Add(ptr);
+                        mo.ObjectCount++;
                         mo.ObjectSize += type.GetSize(ptr);
                     }
                 }
@@ -360,12 +359,15 @@ namespace MemoryDiagnostics
         {
             if (dataGridViewSnapshot.SelectedRows.Count > 0)
             {
-                Snapshot s = dataGridViewSnapshot.SelectedRows[0].DataBoundItem as Snapshot;
-                if (s != null)
+                Snapshot current = Snapshots[snapshotPosition];
+                current.Comment = richTextBoxComment.Text;
+                Snapshot selected = dataGridViewSnapshot.SelectedRows[0].DataBoundItem as Snapshot;
+                richTextBoxComment.Text = selected.Comment;
+                if (selected != null)
                 {
-                    int index = Snapshots.FindIndex(x => x.Date == s.Date);
-                    CompareSnapshots(s, snapshot2Current);
-                    this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", index, s.MemoryPrivateBytes / 1024);
+                    snapshotPosition = Snapshots.FindIndex(x => x.Date == selected.Date);
+                    CompareSnapshots(selected, snapshot2Current);
+                    this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotPosition, selected.MemoryPrivateBytes / 1024);
                 }
             }
         }
@@ -417,11 +419,13 @@ namespace MemoryDiagnostics
             saveFileDialogSnapshot.ShowDialog();
             try
             {
+                Cursor.Current = Cursors.WaitCursor;
                 using (FileStream writerFileStream = new FileStream(saveFileDialogSnapshot.FileName, FileMode.Create, FileAccess.Write))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
                     formatter.Serialize(writerFileStream, Snapshots);                    
                 }
+                Cursor.Current = Cursors.Default;
             }
             catch (Exception ex)
             {
@@ -434,6 +438,7 @@ namespace MemoryDiagnostics
             openFileDialogSnapshot.ShowDialog();
             try
             {
+                Cursor.Current = Cursors.WaitCursor;
                 using (FileStream readerFileStream = new FileStream(openFileDialogSnapshot.FileName, FileMode.Open, FileAccess.Read))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
@@ -441,6 +446,7 @@ namespace MemoryDiagnostics
                     if (Snapshots.Count > 0)
                         RefreshSnapshotGrid(Snapshots[Snapshots.Count - 1]);
                 }
+                Cursor.Current = Cursors.Default;
             }
             catch (Exception ex)
             {

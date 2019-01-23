@@ -15,7 +15,6 @@ namespace MemoryDiagnostics
         public int ObjectCountLast { get; set; }
         public ulong ObjectSize { get; set; }
         public int ObjectChange { get { return ObjectCount - ObjectCountLast; } }
-        public List<ulong> ObjectPtrs { get; set; }
      
         public override string ToString()
         {

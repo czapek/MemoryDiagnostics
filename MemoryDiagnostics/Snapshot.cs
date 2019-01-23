@@ -12,6 +12,7 @@ namespace MemoryDiagnostics
         public SortedDictionary<string, ManagedObject> ManagedObjectDic { get; set; }
         public int ObjectCount { get { return ManagedObjectDic.Count; } }
         public int Position { get; set; }
+        public String Comment { get; set; }
         public ulong MemoryEphemeral { get; set; }
         public ulong MemoryLargeObject { get; set; }
         public ulong MemoryReserved { get; set; }
