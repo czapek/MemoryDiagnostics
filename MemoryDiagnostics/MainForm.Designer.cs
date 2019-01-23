@@ -468,6 +468,7 @@
             this.richTextBoxComment.Size = new System.Drawing.Size(428, 36);
             this.richTextBoxComment.TabIndex = 8;
             this.richTextBoxComment.Text = "";
+            this.richTextBoxComment.TextChanged += new System.EventHandler(this.richTextBoxComment_TextChanged);
             // 
             // MainForm
             // 

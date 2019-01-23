@@ -23,7 +23,7 @@ namespace MemoryDiagnostics
 
         public override string ToString()
         {
-            return Position + ". " +  Date.ToString("HH:mm:ss");
+            return Position + ". " +  Date.ToString("HH:mm:ss") + " " + Comment;
         }
     }
 }

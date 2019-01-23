@@ -70,7 +70,6 @@ namespace MemoryDiagnostics
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
-                if (Snapshots.Count > 0) Snapshots[snapshotPosition].Comment = richTextBoxComment.Text;
                 Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };                
                 Snapshots.Add(snapshot);
                 snapshotPosition = Snapshots.Count - 1;
@@ -251,6 +250,8 @@ namespace MemoryDiagnostics
             if (snapshotPrev == null)
                 return;
 
+            dataGridViewSnapshot.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Snapshots[e.RowIndex - 1].Comment;
+
             if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("PrivateBytes"))
             {
                 if (snapshotPrev.MemoryPrivateBytes > snapshot.MemoryPrivateBytes)
@@ -359,10 +360,10 @@ namespace MemoryDiagnostics
         {
             if (dataGridViewSnapshot.SelectedRows.Count > 0)
             {
-                Snapshot current = Snapshots[snapshotPosition];
-                current.Comment = richTextBoxComment.Text;
                 Snapshot selected = dataGridViewSnapshot.SelectedRows[0].DataBoundItem as Snapshot;
+                snapshotChange = true;
                 richTextBoxComment.Text = selected.Comment;
+                snapshotChange = false;
                 if (selected != null)
                 {
                     snapshotPosition = Snapshots.FindIndex(x => x.Date == selected.Date);
@@ -452,6 +453,13 @@ namespace MemoryDiagnostics
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        bool snapshotChange = false;
+        private void richTextBoxComment_TextChanged(object sender, EventArgs e)
+        {
+            if (Snapshots.Count > 0 && !snapshotChange) 
+                Snapshots[snapshotPosition].Comment = richTextBoxComment.Text;
         }
     }
 }
