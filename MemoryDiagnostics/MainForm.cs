@@ -413,7 +413,7 @@ namespace MemoryDiagnostics
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            saveFileDialogSnapshot.FileName = String.Format($"clrmd_{DateTime.Now:yyyyMMdd_HHmmss}");
+            saveFileDialogSnapshot.FileName = String.Format("clrmd_{0:yyyyMMdd_HHmmss}", DateTime.Now);
             saveFileDialogSnapshot.ShowDialog();
             try
             {
