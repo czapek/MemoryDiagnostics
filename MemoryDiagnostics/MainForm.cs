@@ -14,11 +14,14 @@ using System.Windows.Forms;
 
 namespace MemoryDiagnostics
 {
+    //https://github.com/Microsoft/clrmd/blob/master/Documentation/ClrRuntime.md
     public partial class MainForm : Form
     {
         List<Snapshot> Snapshots = new List<Snapshot>();
         Process process;
         int snapshotPosition = 0;
+        uint dataTargetTimeOut = 10000;
+        AttachFlag dataTargetAttachFlag = AttachFlag.Passive;
 
         public MainForm()
         {
@@ -66,7 +69,7 @@ namespace MemoryDiagnostics
 
         private void CreateManagedObjects()
         {
-            using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, 10000, AttachFlag.Passive))
+            using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
@@ -75,7 +78,7 @@ namespace MemoryDiagnostics
                 snapshotPosition = Snapshots.Count - 1;
                 snapshot.Comment = snapshotPosition + ". Snapshot Comment: ";
                 richTextBoxComment.Text = snapshot.Comment;
-                  CollectMemory(runtime, snapshot);
+                CollectMemory(runtime, snapshot);
                 snapshot.ManagedObjectDic = ListObjects(runtime);
                 RefreshSnapshotGrid(snapshot);
             }
@@ -128,7 +131,7 @@ namespace MemoryDiagnostics
                     continue;
 
                 if (snapshot2.ManagedObjectDic.ContainsKey(mo.ObjectName))
-                    mo.ObjectCountLast = snapshot2.ManagedObjectDic[mo.ObjectName].ObjectCount;
+                    mo.ObjectCountLastHelper = snapshot2.ManagedObjectDic[mo.ObjectName].ObjectCount;
 
                 if ((!onlyChangedFilter.HasValue || !onlyChangedFilter.Value || mo.ObjectChange > 0)
                     && (typeFilter.Count == 0 || typeFilter.Contains(mo.ObjectName)))
@@ -146,12 +149,12 @@ namespace MemoryDiagnostics
                     {
                         ManagedObject fakeObjekt = new ManagedObject()
                         {
-                            ObjectCountLast = mo.ObjectCount,
+                            ObjectCountLastHelper = mo.ObjectCount,
                             ObjectName = mo.ObjectName,
                             ObjectSize = mo.ObjectSize,
                             ObjectCount = 0
                         };
-          
+
                         managedObjectsCompare.Add(fakeObjekt);
                     }
                 }
@@ -159,7 +162,6 @@ namespace MemoryDiagnostics
             return managedObjectsCompare;
         }
 
-        //https://github.com/Microsoft/clrmd/blob/master/Documentation/ClrRuntime.md
         private static void CollectMemory(ClrRuntime runtime, Snapshot s)
         {
             foreach (ClrMemoryRegion r in runtime.EnumerateMemoryRegions())
@@ -195,24 +197,31 @@ namespace MemoryDiagnostics
                 foreach (ulong ptr in runtime.Heap.EnumerateObjectAddresses())
                 {
                     ClrType type = runtime.Heap.GetObjectType(ptr);
-                    if (type != null)
+
+                    //Free objects are not real objects in the strictest sense. They are actually markers placed by the GC to 
+                    //denote free space on the heap. Free objects have no fields (though they do have a size). In general, if 
+                    //you are trying to find heap fragmentation, you will need to take a look at how many Free objects there are, 
+                    //how big they are, and what lies between them. Otherwise, you should ignore them.
+                    //https://github.com/Microsoft/clrmd/blob/master/Documentation/TypesAndFields.md
+                    if (type == null || type.IsFree)
+                        continue;
+
+                    ManagedObject mo = null;
+                    if (!managedObjects.ContainsKey(type.Name))
                     {
-                        ManagedObject mo = null;
-                        if (!managedObjects.ContainsKey(type.Name))
+                        mo = new ManagedObject()
                         {
-                            mo = new ManagedObject()
-                            {
-                                ObjectName = type.Name
-                            };
-                            managedObjects.Add(type.Name, mo);
-                        }
-
-                        if (mo == null)
-                            mo = managedObjects[type.Name];
-
-                        mo.ObjectCount++;
-                        mo.ObjectSize += type.GetSize(ptr);
+                            ObjectName = type.Name
+                        };
+                        managedObjects.Add(type.Name, mo);
                     }
+
+                    if (mo == null)
+                        mo = managedObjects[type.Name];
+
+                    mo.ObjectCount++;
+                    mo.ObjectSize += type.GetSize(ptr);
+
                 }
             }
             return managedObjects;
@@ -267,7 +276,7 @@ namespace MemoryDiagnostics
 
             if (snapshotPrev == null)
                 return;
-      
+
             if (dataGridViewSnapshot.Columns[e.ColumnIndex].Name.Equals("PrivateBytes"))
             {
                 if (snapshotPrev.MemoryPrivateBytes > snapshot.MemoryPrivateBytes)
@@ -553,6 +562,43 @@ namespace MemoryDiagnostics
 
             File.WriteAllText(saveFileDialogReport.FileName, sb.ToString());
 
+        }
+
+        private void buttonStrings_Click(object sender, EventArgs e)
+        {
+            if (process == null)
+                return;
+
+            saveFileDialogStrings.FileName = String.Format("clrmd_{0:yyyyMMdd_HHmmss}", DateTime.Now);
+            if (saveFileDialogStrings.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (File.Exists(saveFileDialogStrings.FileName))
+                File.Delete(saveFileDialogStrings.FileName);
+
+            Cursor.Current = Cursors.WaitCursor;
+            using (StreamWriter writer = new StreamWriter(saveFileDialogStrings.FileName, true, Encoding.UTF8))
+            {
+                using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+                {
+                    ClrInfo clrVersion = dataTarget.ClrVersions.First();
+                    ClrRuntime runtime = clrVersion.CreateRuntime();
+                    if (runtime.Heap.CanWalkHeap)
+                    {
+                        foreach (ulong ptr in runtime.Heap.EnumerateObjectAddresses())
+                        {
+                            ClrType type = runtime.Heap.GetObjectType(ptr);
+
+                            if (type == null || type.IsString == false)
+                            {
+                                continue;
+                            }
+                            writer.WriteLine((string)type.GetValue(ptr));
+                        }
+                    }
+                }
+            }
+            Cursor.Current = Cursors.Default;
         }
     }
 }

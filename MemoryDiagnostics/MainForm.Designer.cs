@@ -81,6 +81,8 @@
             this.richTextBoxComment = new System.Windows.Forms.RichTextBox();
             this.buttonReport = new System.Windows.Forms.Button();
             this.saveFileDialogReport = new System.Windows.Forms.SaveFileDialog();
+            this.buttonStrings = new System.Windows.Forms.Button();
+            this.saveFileDialogStrings = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
             this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
@@ -116,7 +118,7 @@
             this.dataGridViewMain.RowHeadersVisible = false;
             this.dataGridViewMain.RowTemplate.Height = 24;
             this.dataGridViewMain.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewMain.Size = new System.Drawing.Size(1172, 776);
+            this.dataGridViewMain.Size = new System.Drawing.Size(1173, 773);
             this.dataGridViewMain.TabIndex = 0;
             // 
             // OjectName
@@ -285,7 +287,7 @@
             this.dataGridViewSnapshot.ReadOnly = true;
             this.dataGridViewSnapshot.RowHeadersVisible = false;
             this.dataGridViewSnapshot.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewSnapshot.Size = new System.Drawing.Size(485, 776);
+            this.dataGridViewSnapshot.Size = new System.Drawing.Size(484, 773);
             this.dataGridViewSnapshot.TabIndex = 5;
             this.dataGridViewSnapshot.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewSnapshot_CellFormatting);
             this.dataGridViewSnapshot.DoubleClick += new System.EventHandler(this.dataGridViewSnapshot_DoubleClick);
@@ -415,7 +417,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainerMain.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.splitContainerMain.Location = new System.Drawing.Point(3, 50);
+            this.splitContainerMain.Location = new System.Drawing.Point(3, 53);
             this.splitContainerMain.Name = "splitContainerMain";
             // 
             // splitContainerMain.Panel1
@@ -425,14 +427,14 @@
             // splitContainerMain.Panel2
             // 
             this.splitContainerMain.Panel2.Controls.Add(this.dataGridViewMain);
-            this.splitContainerMain.Size = new System.Drawing.Size(1665, 778);
-            this.splitContainerMain.SplitterDistance = 487;
+            this.splitContainerMain.Size = new System.Drawing.Size(1665, 775);
+            this.splitContainerMain.SplitterDistance = 486;
             this.splitContainerMain.TabIndex = 7;
             // 
             // buttonSave
             // 
             this.buttonSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSave.Location = new System.Drawing.Point(1600, 12);
+            this.buttonSave.Location = new System.Drawing.Point(1601, 11);
             this.buttonSave.Margin = new System.Windows.Forms.Padding(2);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(67, 29);
@@ -475,7 +477,7 @@
             // buttonReport
             // 
             this.buttonReport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonReport.Location = new System.Drawing.Point(1449, 11);
+            this.buttonReport.Location = new System.Drawing.Point(1432, 11);
             this.buttonReport.Name = "buttonReport";
             this.buttonReport.Size = new System.Drawing.Size(75, 29);
             this.buttonReport.TabIndex = 9;
@@ -488,11 +490,28 @@
             this.saveFileDialogReport.Filter = "comma separated value |*.csv";
             this.saveFileDialogReport.Title = "Generate a csv report";
             // 
+            // buttonStrings
+            // 
+            this.buttonStrings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonStrings.Location = new System.Drawing.Point(1351, 11);
+            this.buttonStrings.Name = "buttonStrings";
+            this.buttonStrings.Size = new System.Drawing.Size(75, 29);
+            this.buttonStrings.TabIndex = 9;
+            this.buttonStrings.Text = "Strings";
+            this.buttonStrings.UseVisualStyleBackColor = true;
+            this.buttonStrings.Click += new System.EventHandler(this.buttonStrings_Click);
+            // 
+            // saveFileDialogStrings
+            // 
+            this.saveFileDialogStrings.Filter = "text file |*.txt";
+            this.saveFileDialogStrings.Title = "Write all Strings fom Heap";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1671, 831);
+            this.Controls.Add(this.buttonStrings);
             this.Controls.Add(this.buttonReport);
             this.Controls.Add(this.richTextBoxComment);
             this.Controls.Add(this.splitContainerMain);
@@ -506,7 +525,7 @@
             this.Controls.Add(this.buttonNext);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.MinimumSize = new System.Drawing.Size(1300, 500);
+            this.MinimumSize = new System.Drawing.Size(1400, 500);
             this.Name = "MainForm";
             this.Text = "MemoryDiagnostics";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -566,6 +585,8 @@
         private System.Windows.Forms.RichTextBox richTextBoxComment;
         private System.Windows.Forms.Button buttonReport;
         private System.Windows.Forms.SaveFileDialog saveFileDialogReport;
+        private System.Windows.Forms.Button buttonStrings;
+        private System.Windows.Forms.SaveFileDialog saveFileDialogStrings;
     }
 }
 
