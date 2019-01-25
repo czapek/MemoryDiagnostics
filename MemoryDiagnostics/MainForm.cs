@@ -577,6 +577,8 @@ namespace MemoryDiagnostics
                 File.Delete(saveFileDialogStrings.FileName);
 
             Cursor.Current = Cursors.WaitCursor;
+            ulong fullSize = 0;
+            int cnt = 0;
             using (StreamWriter writer = new StreamWriter(saveFileDialogStrings.FileName, true, Encoding.UTF8))
             {
                 using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
@@ -593,10 +595,22 @@ namespace MemoryDiagnostics
                             {
                                 continue;
                             }
+
+                            ulong size = type.GetSize(ptr);
+                            int gen = type.Heap.GetGeneration(ptr);
+                            writer.WriteLine("**{0}#{1:X}#G{2}#{3:n0}", cnt, ptr, gen, size);
                             writer.WriteLine((string)type.GetValue(ptr));
+                            fullSize += size;
+                            cnt++;
                         }
                     }
                 }
+
+                writer.WriteLine();
+                writer.WriteLine("**Position#HeapPtr#Generation#Size");
+                writer.WriteLine("{0:n0} String Objects", cnt);
+                writer.WriteLine("{0:n0} Bytes", fullSize);
+
             }
             Cursor.Current = Cursors.Default;
         }
