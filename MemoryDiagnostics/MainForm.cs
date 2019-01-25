@@ -46,8 +46,10 @@ namespace MemoryDiagnostics
 
         private void NextSnapshot()
         {
-            Process[] allProcesses = Process.GetProcesses();
-            process = allProcesses.FirstOrDefault(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim()));
+            List<Process> allProcesses = Process.GetProcesses().Where(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim())).ToArray().ToList();
+            process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process
+            if (process == null)
+                process = allProcesses.FirstOrDefault();
 
             try
             {
