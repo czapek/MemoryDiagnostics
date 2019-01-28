@@ -401,6 +401,18 @@ namespace MemoryDiagnostics
             }
         }
 
+        private void deleteThisSnapshotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewSnapshot.SelectedRows.Count > 0)
+            {
+                Snapshot selected = dataGridViewSnapshot.SelectedRows[0].DataBoundItem as Snapshot;
+                int index = Snapshots.FindIndex(x => x.Date == selected.Date);
+                Snapshots.RemoveAt(index);
+                bindingSourceSnapshot.DataSource = null;
+                bindingSourceSnapshot.DataSource = Snapshots;
+            }
+        }
+
         private void dataGridViewSnapshot_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
@@ -566,6 +578,11 @@ namespace MemoryDiagnostics
 
         }
 
+        /// <summary>
+        /// Find all Strings in Heap an generate a dublicate string report
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonStrings_Click(object sender, EventArgs e)
         {
             if (process == null)
@@ -579,8 +596,10 @@ namespace MemoryDiagnostics
                 File.Delete(saveFileDialogStrings.FileName);
 
             Cursor.Current = Cursors.WaitCursor;
+            
+            HashSet<StringObjectHelper> stringObjectList = new HashSet<StringObjectHelper>();
             ulong fullSize = 0;
-            int cnt = 0;
+            int objectCount = 0;
             using (StreamWriter writer = new StreamWriter(saveFileDialogStrings.FileName, true, Encoding.UTF8))
             {
                 using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
@@ -598,22 +617,58 @@ namespace MemoryDiagnostics
                                 continue;
                             }
 
-                            ulong size = type.GetSize(ptr);
-                            int gen = type.Heap.GetGeneration(ptr);
-                            writer.WriteLine("**{0}#{1:X}#G{2}#{3:n0}", cnt, ptr, gen, size);
-                            writer.WriteLine((string)type.GetValue(ptr));
-                            fullSize += size;
-                            cnt++;
+                            StringObjectHelper stringObject = new StringObjectHelper();
+                            stringObject.String = (string)type.GetValue(ptr);
+                            stringObject.Size = type.GetSize(ptr);
+
+                            StringObjectHelper stringObjectFound;
+                            if (stringObjectList.TryGetValue(stringObject, out stringObjectFound))
+                                stringObjectFound.PtrList.Add(ptr);
+                            else
+                            {
+                                stringObject.PtrList.Add(ptr);
+                                stringObjectList.Add(stringObject);
+                            }
+                            objectCount++;
+                            fullSize += stringObject.Size;
+
+                            //write all strings
+                            writer.WriteLine("**{0}#{1:X}#G{2}#{3:n0}",
+                                objectCount,
+                                ptr,
+                                type.Heap.GetGeneration(ptr),
+                                stringObject.Size);
+
+                            writer.WriteLine(stringObject.String);
                         }
                     }
+                    
+                    writer.WriteLine();
+                    writer.WriteLine("**Position#HeapPtr#Generation#Size");
+                    writer.WriteLine();
+                    writer.WriteLine("{0:n0} String Objects", objectCount);
+                    writer.WriteLine("{0:n0} String unique Strings", stringObjectList.Count);
+                    writer.WriteLine("{0:n0} Bytes", fullSize);
                 }
-
-                writer.WriteLine();
-                writer.WriteLine("**Position#HeapPtr#Generation#Size");
-                writer.WriteLine("{0:n0} String Objects", cnt);
-                writer.WriteLine("{0:n0} Bytes", fullSize);
-
             }
+
+            //write dublicate info
+            var orderedList = stringObjectList.OrderByDescending(x => x.PtrList.Count);
+            using (StreamWriter writer = new StreamWriter(saveFileDialogStrings.FileName + ".unique.csv", true, Encoding.UTF8))
+            {
+                writer.WriteLine("Count;Size;FullSize;Content;Ptrs");
+                foreach (StringObjectHelper so in orderedList)
+                {
+                    string pointerList = String.Join(",", so.PtrList.Select(x => String.Format("x{0:X}", x)));
+                    writer.WriteLine(String.Format("{0};{1};{2};{3};{4}",
+                            so.PtrList.Count,
+                            so.Size,
+                            so.Size * (ulong)so.PtrList.Count,
+                            (so.String.Length > 50 ? so.String.Substring(0, 50) + " ..." : so.String).Replace("'", "").Replace(";", "").Replace("\r", " ").Replace("\n", ""),
+                            pointerList.Length > 50 ? pointerList.Substring(0, 50) + " ..." : pointerList));
+                }
+            }
+
             Cursor.Current = Cursors.Default;
         }
     }

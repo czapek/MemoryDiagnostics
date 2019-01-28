@@ -83,6 +83,7 @@
             this.saveFileDialogReport = new System.Windows.Forms.SaveFileDialog();
             this.buttonStrings = new System.Windows.Forms.Button();
             this.saveFileDialogStrings = new System.Windows.Forms.SaveFileDialog();
+            this.deleteThisSnapshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
             this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
@@ -393,9 +394,10 @@
             // 
             this.contextMenuStripSnapshot.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.compareWithThisSnapshotDoubleClickToolStripMenuItem,
-            this.selectThisSnapshotToolStripMenuItem});
+            this.selectThisSnapshotToolStripMenuItem,
+            this.deleteThisSnapshotToolStripMenuItem});
             this.contextMenuStripSnapshot.Name = "contextMenuStripSnapshot";
-            this.contextMenuStripSnapshot.Size = new System.Drawing.Size(299, 48);
+            this.contextMenuStripSnapshot.Size = new System.Drawing.Size(299, 92);
             // 
             // compareWithThisSnapshotDoubleClickToolStripMenuItem
             // 
@@ -506,6 +508,13 @@
             this.saveFileDialogStrings.Filter = "text file |*.txt";
             this.saveFileDialogStrings.Title = "Write all Strings fom Heap";
             // 
+            // deleteThisSnapshotToolStripMenuItem
+            // 
+            this.deleteThisSnapshotToolStripMenuItem.Name = "deleteThisSnapshotToolStripMenuItem";
+            this.deleteThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(298, 22);
+            this.deleteThisSnapshotToolStripMenuItem.Text = "Delete this Snapshot";
+            this.deleteThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.deleteThisSnapshotToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -587,6 +596,7 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialogReport;
         private System.Windows.Forms.Button buttonStrings;
         private System.Windows.Forms.SaveFileDialog saveFileDialogStrings;
+        private System.Windows.Forms.ToolStripMenuItem deleteThisSnapshotToolStripMenuItem;
     }
 }
 
