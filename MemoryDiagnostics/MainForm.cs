@@ -90,6 +90,7 @@ namespace MemoryDiagnostics
         {
             bindingSourceSnapshot.DataSource = null;
             bindingSourceSnapshot.DataSource = Snapshots;
+
             Regular.Visible = Snapshots.Sum(x => (long)x.MemoryRegular) > 0;
             Reserved.Visible = Snapshots.Sum(x => (long)x.MemoryReserved) > 0;
 
@@ -97,9 +98,9 @@ namespace MemoryDiagnostics
                 CompareSnapshotsAndDisplay(selectedSnapshot, Snapshots[Snapshots.Count - 2]);
             else
                 CompareSnapshotsAndDisplay(selectedSnapshot, selectedSnapshot);
-
-            snapshotPosition = Snapshots.FindIndex(x => x.Date == selectedSnapshot.Date);
-            this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotPosition, selectedSnapshot.MemoryPrivateBytes / 1024);
+            
+            dataGridViewSnapshot.ClearSelection();
+            dataGridViewSnapshot.Rows[snapshotPosition].Selected = true;          
             splitContainerMain.SplitterDistance = dataGridViewSnapshot.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible).Sum(x => x.Width) + 6;
         }
 
@@ -112,12 +113,13 @@ namespace MemoryDiagnostics
 
             snapshot1Current = snapshot1;
             snapshot2Current = snapshot2;
+            snapshotPosition = Snapshots.FindIndex(x => x.Date == snapshot1Current.Date);
+            int snapshotPosition2 = Snapshots.FindIndex(x => x.Date == snapshot2Current.Date);
 
             SortableBindingList<ManagedObject> managedObjectsCompare = CompareSnapshots(snapshot1, snapshot2, textBoxObjectFilter.Text.Trim(), checkBoxChange.Checked);
-
             bindingSourceMain.DataSource = managedObjectsCompare;
-            dataGridViewSnapshot.ClearSelection();
-            dataGridViewSnapshot.Rows[Snapshots.FindIndex(x => x.Date == snapshot2.Date)].Selected = true;
+
+            this.Text = String.Format("{0}. Snapshot compared with {2}., {1:n0} KB (private bytes)", snapshotPosition, snapshot1Current.MemoryPrivateBytes / 1024, snapshotPosition2);
         }
 
         private SortableBindingList<ManagedObject> CompareSnapshots(Snapshot snapshot1, Snapshot snapshot2, string filter, Boolean? onlyChangedFilter)
@@ -234,11 +236,6 @@ namespace MemoryDiagnostics
             NextSnapshot();
         }
 
-        private void dataGridViewSnapshot_DoubleClick(object sender, EventArgs e)
-        {
-            CompareWithThisSnapshot();
-        }
-
         private void CompareWithThisSnapshot()
         {
             if (dataGridViewSnapshot.SelectedRows.Count > 0)
@@ -247,7 +244,7 @@ namespace MemoryDiagnostics
                 Snapshot s = row.DataBoundItem as Snapshot;
 
                 if (s != null && Snapshots.Count > 0)
-                    CompareSnapshotsAndDisplay(Snapshots[Snapshots.Count - 1], s);
+                    CompareSnapshotsAndDisplay(snapshot1Current, s);
             }
         }
 
@@ -383,7 +380,17 @@ namespace MemoryDiagnostics
             CompareWithThisSnapshot();
         }
 
+        private void dataGridViewSnapshot_DoubleClick(object sender, EventArgs e)
+        {
+            selectThisSnapshot();
+        }
+
         private void selectThisSnapshotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selectThisSnapshot();
+        }
+
+        private void selectThisSnapshot()
         {
             if (dataGridViewSnapshot.SelectedRows.Count > 0)
             {
@@ -395,8 +402,13 @@ namespace MemoryDiagnostics
                 if (selected != null)
                 {
                     snapshotPosition = Snapshots.FindIndex(x => x.Date == selected.Date);
-                    CompareSnapshotsAndDisplay(selected, snapshot2Current);
-                    this.Text = String.Format("{0}. Snapshot, {1:n0} KB (private bytes)", snapshotPosition, selected.MemoryPrivateBytes / 1024);
+
+                    if (snapshotPosition >= 1)
+                        snapshot2Current = Snapshots[snapshotPosition - 1];
+                    else
+                        snapshot2Current = Snapshots[0];
+
+                    CompareSnapshotsAndDisplay(selected, snapshot2Current);                    
                 }
             }
         }
@@ -596,7 +608,7 @@ namespace MemoryDiagnostics
                 File.Delete(saveFileDialogStrings.FileName);
 
             Cursor.Current = Cursors.WaitCursor;
-            
+
             HashSet<StringObjectHelper> stringObjectList = new HashSet<StringObjectHelper>();
             ulong fullSize = 0;
             int objectCount = 0;
@@ -642,7 +654,7 @@ namespace MemoryDiagnostics
                             writer.WriteLine(stringObject.String);
                         }
                     }
-                    
+
                     writer.WriteLine();
                     writer.WriteLine("**Position#HeapPtr#Generation#Size");
                     writer.WriteLine();

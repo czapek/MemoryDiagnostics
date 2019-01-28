@@ -393,24 +393,24 @@
             // contextMenuStripSnapshot
             // 
             this.contextMenuStripSnapshot.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.compareWithThisSnapshotDoubleClickToolStripMenuItem,
             this.selectThisSnapshotToolStripMenuItem,
+            this.compareWithThisSnapshotDoubleClickToolStripMenuItem,
             this.deleteThisSnapshotToolStripMenuItem});
             this.contextMenuStripSnapshot.Name = "contextMenuStripSnapshot";
-            this.contextMenuStripSnapshot.Size = new System.Drawing.Size(299, 92);
+            this.contextMenuStripSnapshot.Size = new System.Drawing.Size(255, 92);
             // 
             // compareWithThisSnapshotDoubleClickToolStripMenuItem
             // 
             this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Name = "compareWithThisSnapshotDoubleClickToolStripMenuItem";
-            this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Size = new System.Drawing.Size(298, 22);
-            this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Text = "Compare with this Snapshot (DoubleClick)";
+            this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
+            this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Text = "Compare with this Snapshot";
             this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Click += new System.EventHandler(this.compareWithThisSnapshotDoubleClickToolStripMenuItem_Click);
             // 
             // selectThisSnapshotToolStripMenuItem
             // 
             this.selectThisSnapshotToolStripMenuItem.Name = "selectThisSnapshotToolStripMenuItem";
-            this.selectThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(298, 22);
-            this.selectThisSnapshotToolStripMenuItem.Text = "Select this Snapshot";
+            this.selectThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
+            this.selectThisSnapshotToolStripMenuItem.Text = "Select this Snapshot (DoubleClick)";
             this.selectThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.selectThisSnapshotToolStripMenuItem_Click);
             // 
             // splitContainerMain
@@ -511,7 +511,7 @@
             // deleteThisSnapshotToolStripMenuItem
             // 
             this.deleteThisSnapshotToolStripMenuItem.Name = "deleteThisSnapshotToolStripMenuItem";
-            this.deleteThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(298, 22);
+            this.deleteThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
             this.deleteThisSnapshotToolStripMenuItem.Text = "Delete this Snapshot";
             this.deleteThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.deleteThisSnapshotToolStripMenuItem_Click);
             // 
