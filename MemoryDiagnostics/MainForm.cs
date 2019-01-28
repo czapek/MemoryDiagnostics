@@ -21,7 +21,7 @@ namespace MemoryDiagnostics
         Process process;
         int snapshotPosition = 0;
         uint dataTargetTimeOut = 10000;
-        AttachFlag dataTargetAttachFlag = AttachFlag.Passive;
+        AttachFlag dataTargetAttachFlag = AttachFlag.NonInvasive;
 
         public MainForm()
         {
@@ -98,9 +98,9 @@ namespace MemoryDiagnostics
                 CompareSnapshotsAndDisplay(selectedSnapshot, Snapshots[Snapshots.Count - 2]);
             else
                 CompareSnapshotsAndDisplay(selectedSnapshot, selectedSnapshot);
-            
+
             dataGridViewSnapshot.ClearSelection();
-            dataGridViewSnapshot.Rows[snapshotPosition].Selected = true;          
+            dataGridViewSnapshot.Rows[snapshotPosition].Selected = true;
             splitContainerMain.SplitterDistance = dataGridViewSnapshot.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible).Sum(x => x.Width) + 6;
         }
 
@@ -408,7 +408,7 @@ namespace MemoryDiagnostics
                     else
                         snapshot2Current = Snapshots[0];
 
-                    CompareSnapshotsAndDisplay(selected, snapshot2Current);                    
+                    CompareSnapshotsAndDisplay(selected, snapshot2Current);
                 }
             }
         }
@@ -682,6 +682,21 @@ namespace MemoryDiagnostics
             }
 
             Cursor.Current = Cursors.Default;
+        }
+
+        private void walkTheHeapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewMain.SelectedRows.Count > 0)
+            {
+                ManagedObject m = dataGridViewMain.SelectedRows[0].DataBoundItem as ManagedObject;
+                using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+                {
+                    ClrInfo clrVersion = dataTarget.ClrVersions.First();
+                    ClrRuntime runtime = clrVersion.CreateRuntime();
+                    RetentionTreeViewer r = new RetentionTreeViewer(runtime, m.ObjectName);
+                    r.ShowDialog();
+                }                     
+            }
         }
     }
 }

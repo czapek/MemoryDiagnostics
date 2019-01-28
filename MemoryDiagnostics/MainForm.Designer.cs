@@ -70,8 +70,9 @@
             this.Reserved = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Other = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.contextMenuStripSnapshot = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.compareWithThisSnapshotDoubleClickToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectThisSnapshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.compareWithThisSnapshotDoubleClickToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteThisSnapshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bindingSourceSnapshot = new System.Windows.Forms.BindingSource(this.components);
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.buttonSave = new System.Windows.Forms.Button();
@@ -83,7 +84,7 @@
             this.saveFileDialogReport = new System.Windows.Forms.SaveFileDialog();
             this.buttonStrings = new System.Windows.Forms.Button();
             this.saveFileDialogStrings = new System.Windows.Forms.SaveFileDialog();
-            this.deleteThisSnapshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.walkTheHeapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
             this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
@@ -177,9 +178,10 @@
             this.contextMenuStripMemoryObjects.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.filterForSelectedTypesToolStripMenuItem,
             this.clearFilterToolStripMenuItem,
-            this.copyObjectNameToolStripMenuItem});
+            this.copyObjectNameToolStripMenuItem,
+            this.walkTheHeapToolStripMenuItem});
             this.contextMenuStripMemoryObjects.Name = "contextMenuStripMeomoryObjects";
-            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(215, 70);
+            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(215, 114);
             // 
             // filterForSelectedTypesToolStripMenuItem
             // 
@@ -397,7 +399,14 @@
             this.compareWithThisSnapshotDoubleClickToolStripMenuItem,
             this.deleteThisSnapshotToolStripMenuItem});
             this.contextMenuStripSnapshot.Name = "contextMenuStripSnapshot";
-            this.contextMenuStripSnapshot.Size = new System.Drawing.Size(255, 92);
+            this.contextMenuStripSnapshot.Size = new System.Drawing.Size(255, 70);
+            // 
+            // selectThisSnapshotToolStripMenuItem
+            // 
+            this.selectThisSnapshotToolStripMenuItem.Name = "selectThisSnapshotToolStripMenuItem";
+            this.selectThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
+            this.selectThisSnapshotToolStripMenuItem.Text = "Select this Snapshot (DoubleClick)";
+            this.selectThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.selectThisSnapshotToolStripMenuItem_Click);
             // 
             // compareWithThisSnapshotDoubleClickToolStripMenuItem
             // 
@@ -406,12 +415,12 @@
             this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Text = "Compare with this Snapshot";
             this.compareWithThisSnapshotDoubleClickToolStripMenuItem.Click += new System.EventHandler(this.compareWithThisSnapshotDoubleClickToolStripMenuItem_Click);
             // 
-            // selectThisSnapshotToolStripMenuItem
+            // deleteThisSnapshotToolStripMenuItem
             // 
-            this.selectThisSnapshotToolStripMenuItem.Name = "selectThisSnapshotToolStripMenuItem";
-            this.selectThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
-            this.selectThisSnapshotToolStripMenuItem.Text = "Select this Snapshot (DoubleClick)";
-            this.selectThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.selectThisSnapshotToolStripMenuItem_Click);
+            this.deleteThisSnapshotToolStripMenuItem.Name = "deleteThisSnapshotToolStripMenuItem";
+            this.deleteThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
+            this.deleteThisSnapshotToolStripMenuItem.Text = "Delete this Snapshot";
+            this.deleteThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.deleteThisSnapshotToolStripMenuItem_Click);
             // 
             // splitContainerMain
             // 
@@ -508,12 +517,12 @@
             this.saveFileDialogStrings.Filter = "text file |*.txt";
             this.saveFileDialogStrings.Title = "Write all Strings fom Heap";
             // 
-            // deleteThisSnapshotToolStripMenuItem
+            // walkTheHeapToolStripMenuItem
             // 
-            this.deleteThisSnapshotToolStripMenuItem.Name = "deleteThisSnapshotToolStripMenuItem";
-            this.deleteThisSnapshotToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
-            this.deleteThisSnapshotToolStripMenuItem.Text = "Delete this Snapshot";
-            this.deleteThisSnapshotToolStripMenuItem.Click += new System.EventHandler(this.deleteThisSnapshotToolStripMenuItem_Click);
+            this.walkTheHeapToolStripMenuItem.Name = "walkTheHeapToolStripMenuItem";
+            this.walkTheHeapToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.walkTheHeapToolStripMenuItem.Text = "Walk the Heap";
+            this.walkTheHeapToolStripMenuItem.Click += new System.EventHandler(this.walkTheHeapToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -597,6 +606,7 @@
         private System.Windows.Forms.Button buttonStrings;
         private System.Windows.Forms.SaveFileDialog saveFileDialogStrings;
         private System.Windows.Forms.ToolStripMenuItem deleteThisSnapshotToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem walkTheHeapToolStripMenuItem;
     }
 }
 
