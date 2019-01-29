@@ -53,6 +53,7 @@
             this.clearFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyObjectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.walkTheHeapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.objectOverviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bindingSourceMain = new System.Windows.Forms.BindingSource(this.components);
             this.buttonNext = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -85,7 +86,7 @@
             this.saveFileDialogReport = new System.Windows.Forms.SaveFileDialog();
             this.buttonStrings = new System.Windows.Forms.Button();
             this.saveFileDialogStrings = new System.Windows.Forms.SaveFileDialog();
-            this.loadRetentionTreeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveFileDialogObjects = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
             this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
@@ -181,37 +182,44 @@
             this.clearFilterToolStripMenuItem,
             this.copyObjectNameToolStripMenuItem,
             this.walkTheHeapToolStripMenuItem,
-            this.loadRetentionTreeToolStripMenuItem});
+            this.objectOverviewToolStripMenuItem});
             this.contextMenuStripMemoryObjects.Name = "contextMenuStripMeomoryObjects";
-            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(333, 114);
+            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(243, 136);
             // 
             // filterForSelectedTypesToolStripMenuItem
             // 
             this.filterForSelectedTypesToolStripMenuItem.Name = "filterForSelectedTypesToolStripMenuItem";
-            this.filterForSelectedTypesToolStripMenuItem.Size = new System.Drawing.Size(332, 22);
+            this.filterForSelectedTypesToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
             this.filterForSelectedTypesToolStripMenuItem.Text = "Add selected types to filter";
             this.filterForSelectedTypesToolStripMenuItem.Click += new System.EventHandler(this.filterForSelectedTypesToolStripMenuItem_Click);
             // 
             // clearFilterToolStripMenuItem
             // 
             this.clearFilterToolStripMenuItem.Name = "clearFilterToolStripMenuItem";
-            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(332, 22);
+            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
             this.clearFilterToolStripMenuItem.Text = "Clear Filter";
             this.clearFilterToolStripMenuItem.Click += new System.EventHandler(this.clearFilterToolStripMenuItem_Click);
             // 
             // copyObjectNameToolStripMenuItem
             // 
             this.copyObjectNameToolStripMenuItem.Name = "copyObjectNameToolStripMenuItem";
-            this.copyObjectNameToolStripMenuItem.Size = new System.Drawing.Size(332, 22);
+            this.copyObjectNameToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
             this.copyObjectNameToolStripMenuItem.Text = "Copy this Type Name";
             this.copyObjectNameToolStripMenuItem.Click += new System.EventHandler(this.copyObjectNameToolStripMenuItem_Click);
             // 
             // walkTheHeapToolStripMenuItem
             // 
             this.walkTheHeapToolStripMenuItem.Name = "walkTheHeapToolStripMenuItem";
-            this.walkTheHeapToolStripMenuItem.Size = new System.Drawing.Size(332, 22);
-            this.walkTheHeapToolStripMenuItem.Text = "View objects of this type in Retention Tree Viewer";
+            this.walkTheHeapToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.walkTheHeapToolStripMenuItem.Text = "Open Retention Tree Viewer";
             this.walkTheHeapToolStripMenuItem.Click += new System.EventHandler(this.walkTheHeapToolStripMenuItem_Click);
+            // 
+            // objectOverviewToolStripMenuItem
+            // 
+            this.objectOverviewToolStripMenuItem.Name = "objectOverviewToolStripMenuItem";
+            this.objectOverviewToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.objectOverviewToolStripMenuItem.Text = "Save Field Overview of this Type";
+            this.objectOverviewToolStripMenuItem.Click += new System.EventHandler(this.objectOverviewToolStripMenuItem_Click);
             // 
             // buttonNext
             // 
@@ -526,12 +534,10 @@
             this.saveFileDialogStrings.Filter = "text file |*.txt";
             this.saveFileDialogStrings.Title = "Write all Strings fom Heap";
             // 
-            // loadRetentionTreeToolStripMenuItem
+            // saveFileDialogObjects
             // 
-            this.loadRetentionTreeToolStripMenuItem.Name = "loadRetentionTreeToolStripMenuItem";
-            this.loadRetentionTreeToolStripMenuItem.Size = new System.Drawing.Size(332, 22);
-            this.loadRetentionTreeToolStripMenuItem.Text = "Load in Retention Tree Viewer";
-            this.loadRetentionTreeToolStripMenuItem.Click += new System.EventHandler(this.loadRetentionTreeToolStripMenuItem_Click);
+            this.saveFileDialogObjects.Filter = "text file |*.txt";
+            this.saveFileDialogObjects.Title = "Write Field Info of all Objects";
             // 
             // MainForm
             // 
@@ -615,8 +621,9 @@
         private System.Windows.Forms.Button buttonStrings;
         private System.Windows.Forms.SaveFileDialog saveFileDialogStrings;
         private System.Windows.Forms.ToolStripMenuItem deleteThisSnapshotToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem objectOverviewToolStripMenuItem;
+        private System.Windows.Forms.SaveFileDialog saveFileDialogObjects;
         private System.Windows.Forms.ToolStripMenuItem walkTheHeapToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadRetentionTreeToolStripMenuItem;
     }
 }
 

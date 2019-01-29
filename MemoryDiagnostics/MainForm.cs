@@ -695,14 +695,69 @@ namespace MemoryDiagnostics
                     ClrRuntime runtime = clrVersion.CreateRuntime();
                     RetentionTreeViewer r = new RetentionTreeViewer(runtime, m.ObjectName);
                     r.ShowDialog(this);
-                }                     
+                }
             }
         }
 
-        private void loadRetentionTreeToolStripMenuItem_Click(object sender, EventArgs e)
+        //https://github.com/Microsoft/dotnet-samples/tree/master/Microsoft.Diagnostics.Runtime/CLRMD
+        private void objectOverviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RetentionTreeViewer r = new RetentionTreeViewer(true);
-            r.ShowDialog(this);
+            if (process == null)
+                return;
+
+            saveFileDialogObjects.FileName = String.Format("clrmd_{0:yyyyMMdd_HHmmss}_FieldInfo", DateTime.Now);
+            if (saveFileDialogObjects.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (File.Exists(saveFileDialogObjects.FileName))
+                File.Delete(saveFileDialogObjects.FileName);
+
+            Cursor.Current = Cursors.WaitCursor;
+
+            using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+            {
+                ClrInfo clrVersion = dataTarget.ClrVersions.First();
+                ClrRuntime runtime = clrVersion.CreateRuntime();
+                if (runtime.Heap.CanWalkHeap)
+                {
+                    using (StreamWriter writer = new StreamWriter(saveFileDialogObjects.FileName, true, Encoding.UTF8))
+                    {
+                        foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
+                        {
+                            ManagedObject m = row.DataBoundItem as ManagedObject;
+
+                            foreach (ulong ptr in runtime.Heap.EnumerateObjectAddresses())
+                            {
+                                ClrType type = runtime.Heap.GetObjectType(ptr);
+
+                                if (type == null || type.Name != m.ObjectName)
+                                    continue;
+
+                                writer.WriteLine();
+                                writer.WriteLine("{1} {0:X}", ptr, m.ObjectName);
+                                foreach (ClrInstanceField f in type.Fields)
+                                {
+                                    object value = f.GetValue(ptr);
+                                    if (value == null)
+                                    {
+                                        if (f.Type.Name == "System.DateTime")
+                                        {
+                                            value = "TODO//datetime";
+                                        }
+                                        else
+                                        {
+                                            value = f.GetAddress(ptr).ToString("X");
+                                        }
+                                    }
+
+                                    writer.WriteLine("\t{0}: {1}", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Cursor.Current = Cursors.Default;
         }
     }
 }

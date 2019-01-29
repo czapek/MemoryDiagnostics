@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -22,17 +23,6 @@ namespace MemoryDiagnostics
             InitializeComponent();
         }
 
-        public RetentionTreeViewer(bool openFile)
-        {
-            InitializeComponent();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-
-            if (openFile)
-                openFileDialog();
-
-        }
-
         public RetentionTreeViewer(ClrRuntime runtime, String objectName)
         {
             this.runtime = runtime;
@@ -40,11 +30,15 @@ namespace MemoryDiagnostics
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 
-            List<ClrTypeHelper> c = ClrMdHelper.GetPtrsForObjectName(runtime, objectName);
-            comboBoxClrMdTypes.Items.AddRange(c.ToArray());
-
-            if (comboBoxClrMdTypes.Items.Count > 0)
-                comboBoxClrMdTypes.SelectedIndex = 0;
+            if (runtime != null)
+            {
+                List<ClrTypeHelper> c = ClrMdHelper.GetPtrsForObjectName(runtime, objectName);
+                comboBoxClrMdTypes.Items.AddRange(c.ToArray());
+            }
+            else
+            {     
+                    openFileDialog();
+            }
         }
 
         private void AddNodesRecursive(ClrTypeHelper root, TreeNodeCollection nodes)
@@ -144,6 +138,30 @@ namespace MemoryDiagnostics
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void comboBoxClrMdTypes_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                ulong ptr;
+                if(ulong.TryParse(comboBoxClrMdTypes.Text, NumberStyles.HexNumber,  CultureInfo.CurrentCulture,   out ptr))
+                {
+                    ClrType type = runtime.Heap.GetObjectType(ptr);
+                    if (type != null)
+                    {
+                        ClrTypeHelper clrTypeHelper = new ClrTypeHelper()
+                        {
+                            Ptr = ptr,
+                            Name = type.Name,
+                            Size = type.GetSize(ptr)
+                        };
+
+                        comboBoxClrMdTypes.Items.Add(clrTypeHelper);
+                        comboBoxClrMdTypes.SelectedIndex = comboBoxClrMdTypes.Items.Count - 1;
+                    }
+                }      
             }
         }
     }

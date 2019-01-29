@@ -59,19 +59,19 @@
             this.expandAllToolStripMenuItem,
             this.collapsAllToolStripMenuItem});
             this.contextMenuStripRetention.Name = "contextMenuStrip1";
-            this.contextMenuStripRetention.Size = new System.Drawing.Size(153, 70);
+            this.contextMenuStripRetention.Size = new System.Drawing.Size(129, 48);
             // 
             // expandAllToolStripMenuItem
             // 
             this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
-            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.expandAllToolStripMenuItem.Text = "Expand all";
             this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
             // 
             // collapsAllToolStripMenuItem
             // 
             this.collapsAllToolStripMenuItem.Name = "collapsAllToolStripMenuItem";
-            this.collapsAllToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.collapsAllToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
             this.collapsAllToolStripMenuItem.Text = "Collaps all";
             this.collapsAllToolStripMenuItem.Click += new System.EventHandler(this.collapsAllToolStripMenuItem_Click);
             // 
@@ -84,7 +84,9 @@
             this.comboBoxClrMdTypes.Name = "comboBoxClrMdTypes";
             this.comboBoxClrMdTypes.Size = new System.Drawing.Size(680, 21);
             this.comboBoxClrMdTypes.TabIndex = 1;
+            this.comboBoxClrMdTypes.Text = "Enter also a free hex pointer and press return ...";
             this.comboBoxClrMdTypes.SelectedIndexChanged += new System.EventHandler(this.comboBoxClrMdTypes_SelectedIndexChanged);
+            this.comboBoxClrMdTypes.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBoxClrMdTypes_KeyDown);
             // 
             // saveFileDialogImage
             // 
