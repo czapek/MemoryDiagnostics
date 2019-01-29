@@ -694,9 +694,15 @@ namespace MemoryDiagnostics
                     ClrInfo clrVersion = dataTarget.ClrVersions.First();
                     ClrRuntime runtime = clrVersion.CreateRuntime();
                     RetentionTreeViewer r = new RetentionTreeViewer(runtime, m.ObjectName);
-                    r.ShowDialog();
+                    r.ShowDialog(this);
                 }                     
             }
+        }
+
+        private void loadRetentionTreeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RetentionTreeViewer r = new RetentionTreeViewer(true);
+            r.ShowDialog(this);
         }
     }
 }

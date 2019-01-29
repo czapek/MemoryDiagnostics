@@ -57,7 +57,7 @@ namespace MemoryDiagnostics
 
                         if (clrTypeHelper.Ptr == address)
                             continue;
-
+                       
                         ClrTypeHelper c = new ClrTypeHelper()
                         {
                             Ptr = address,

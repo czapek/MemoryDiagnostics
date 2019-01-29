@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MemoryDiagnostics
 {
+    [Serializable]
     public class ClrTypeHelper : IEquatable<ClrTypeHelper>
     {
         public ulong Ptr;
