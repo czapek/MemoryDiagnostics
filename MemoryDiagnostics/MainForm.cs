@@ -725,6 +725,9 @@ namespace MemoryDiagnostics
                         foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
                         {
                             ManagedObject m = row.DataBoundItem as ManagedObject;
+                            
+                            writer.WriteLine("*********************** {0} ************************", m.ObjectName);
+                            writer.WriteLine();
 
                             foreach (ulong ptr in runtime.Heap.EnumerateObjectAddresses())
                             {
@@ -733,26 +736,35 @@ namespace MemoryDiagnostics
                                 if (type == null || type.Name != m.ObjectName)
                                     continue;
 
-                                writer.WriteLine();
-                                writer.WriteLine("{1} {0:X}", ptr, m.ObjectName);
+                                 writer.WriteLine("{1} {0:X}", ptr, m.ObjectName);
                                 foreach (ClrInstanceField f in type.Fields)
                                 {
-                                    object value = f.GetValue(ptr);
-                                    if (value == null)
+                                    object value = f.GetValue(ptr);                                   
+
+                                    if ((f.IsObjectReference || f.ElementType == ClrElementType.Struct) && f.ElementType != ClrElementType.String)
                                     {
-                                        if (f.Type.Name == "System.DateTime")
+                                        value = String.Format("{1} {0:X}", f.GetAddress(ptr), f.ElementType);
+
+                                        if (f.ElementType == ClrElementType.Struct && f.Type.Name == "System.DateTime")
                                         {
-                                            value = "TODO//datetime";
-                                        }
-                                        else
-                                        {
-                                            value = f.GetAddress(ptr).ToString("X");
+                                            foreach (ClrInstanceField fd in f.Type.Fields)
+                                                if (fd.Name == "dateData")
+                                                {
+                                                    //https://stackoverflow.com/questions/10759287/interpret-uint64-datedata-in-net-datetime-structure
+                                                    //http://www.dotnetframework.org/default.aspx/DotNET/DotNET/8@0/untmp/whidbey/REDBITS/ndp/clr/src/BCL/System/DateTime@cs/1/DateTime@cs
+                                                    UInt64 dateData = (UInt64)fd.GetValue(fd.GetAddress(ptr));
+                                                    Int64 ticks = (Int64)(dateData & (UInt64)0x3FFFFFFFFFFFFFFF);
+                                                    //TODO klappt nicht so recht
+                                                    //value = DateTime.FromBinary(ticks);
+                                                }
+
                                         }
                                     }
-
-                                    writer.WriteLine("\t{0}: {1}", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value);
+                                    writer.WriteLine("\t{0}: {1} [{2}]", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value, f.Type.Name);                                    
                                 }
+                                writer.WriteLine();
                             }
+                            writer.WriteLine();
                         }
                     }
                 }
