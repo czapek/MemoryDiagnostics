@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MemoryDiagnostics
 {
@@ -11,6 +12,10 @@ namespace MemoryDiagnostics
     {
         public ulong Ptr;
         public string Name;
+        [NonSerialized]
+        public string ObjectInfo;
+        [NonSerialized]
+        public TreeNode TreeNode;
         public ulong Size;
         public HashSet<ClrTypeHelper> Parents = new HashSet<ClrTypeHelper>();
 

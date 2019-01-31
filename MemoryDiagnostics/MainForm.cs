@@ -19,6 +19,20 @@ namespace MemoryDiagnostics
     {
         List<Snapshot> Snapshots = new List<Snapshot>();
         Process process;
+        Process Process
+        {
+            get
+            {
+                if(process == null || process.HasExited)
+                {
+                    List<Process> allProcesses = Process.GetProcesses().Where(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim())).ToArray().ToList();
+                    process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process
+                    if (Process == null)
+                        process = allProcesses.FirstOrDefault();
+                }
+                return process;
+            }
+        }
         int snapshotPosition = 0;
         uint dataTargetTimeOut = 10000;
         AttachFlag dataTargetAttachFlag = AttachFlag.NonInvasive;
@@ -46,11 +60,6 @@ namespace MemoryDiagnostics
 
         private void NextSnapshot()
         {
-            List<Process> allProcesses = Process.GetProcesses().Where(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim())).ToArray().ToList();
-            process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process
-            if (process == null)
-                process = allProcesses.FirstOrDefault();
-
             try
             {
                 Cursor.Current = Cursors.WaitCursor;
@@ -63,19 +72,19 @@ namespace MemoryDiagnostics
             }
             catch (Exception ex)
             {
-                if (ex is ClrDiagnosticsException && process != null)
-                    MessageBox.Show("This tool have to be compiled for the same architecture as the aimed process " + process.ProcessName + " (32/64bit)", ex.Message);
+                if (ex is ClrDiagnosticsException && Process != null)
+                    MessageBox.Show("This tool have to be compiled for the same architecture as the aimed process " + Process.ProcessName + " (32/64bit)", ex.Message);
                 this.Text = ex.Message;
             }
         }
 
         private void CreateManagedObjects()
         {
-            using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+            using (DataTarget dataTarget = DataTarget.AttachToProcess(Process.Id, dataTargetTimeOut, dataTargetAttachFlag))
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
-                Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };
+                Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = Process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };
                 Snapshots.Add(snapshot);
                 snapshotPosition = Snapshots.Count - 1;
                 snapshot.Comment = snapshotPosition + ". Snapshot Comment: ";
@@ -597,7 +606,7 @@ namespace MemoryDiagnostics
         /// <param name="e"></param>
         private void buttonStrings_Click(object sender, EventArgs e)
         {
-            if (process == null)
+            if (Process == null)
                 return;
 
             saveFileDialogStrings.FileName = String.Format("clrmd_{0:yyyyMMdd_HHmmss}", DateTime.Now);
@@ -614,7 +623,7 @@ namespace MemoryDiagnostics
             int objectCount = 0;
             using (StreamWriter writer = new StreamWriter(saveFileDialogStrings.FileName, true, Encoding.UTF8))
             {
-                using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+                using (DataTarget dataTarget = DataTarget.AttachToProcess(Process.Id, dataTargetTimeOut, dataTargetAttachFlag))
                 {
                     ClrInfo clrVersion = dataTarget.ClrVersions.First();
                     ClrRuntime runtime = clrVersion.CreateRuntime();
@@ -686,23 +695,51 @@ namespace MemoryDiagnostics
 
         private void walkTheHeapToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (dataGridViewMain.SelectedRows.Count > 0)
+            List<String> managedObjects = new List<String>();
+            foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
             {
-                ManagedObject m = dataGridViewMain.SelectedRows[0].DataBoundItem as ManagedObject;
-                using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+                managedObjects.Add(((ManagedObject)row.DataBoundItem).ObjectName);
+            }
+
+            if (Process != null)
+                using (DataTarget dataTarget = DataTarget.AttachToProcess(Process.Id, dataTargetTimeOut, dataTargetAttachFlag))
                 {
                     ClrInfo clrVersion = dataTarget.ClrVersions.First();
                     ClrRuntime runtime = clrVersion.CreateRuntime();
-                    RetentionTreeViewer r = new RetentionTreeViewer(runtime, m.ObjectName);
+                    RetentionTreeViewer r = new RetentionTreeViewer(runtime, managedObjects);
                     r.ShowDialog(this);
                 }
+            else
+            {
+                RetentionTreeViewer r = new RetentionTreeViewer(null, managedObjects);
+                r.ShowDialog(this);
+            }
+        }
+
+        private void openInObjectInspectorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Process == null)
+                return;
+
+            List<String> managedObjects = new List<String>();
+            foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
+            {
+                managedObjects.Add(((ManagedObject)row.DataBoundItem).ObjectName);
+            }
+
+            using (DataTarget dataTarget = DataTarget.AttachToProcess(Process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+            {
+                ClrInfo clrVersion = dataTarget.ClrVersions.First();
+                ClrRuntime runtime = clrVersion.CreateRuntime();
+                ObjectInspector o = new ObjectInspector(runtime, managedObjects);
+                o.ShowDialog(this);
             }
         }
 
         //https://github.com/Microsoft/dotnet-samples/tree/master/Microsoft.Diagnostics.Runtime/CLRMD
         private void objectOverviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (process == null)
+            if (Process == null)
                 return;
 
             saveFileDialogObjects.FileName = String.Format("clrmd_{0:yyyyMMdd_HHmmss}_FieldInfo", DateTime.Now);
@@ -714,7 +751,7 @@ namespace MemoryDiagnostics
 
             Cursor.Current = Cursors.WaitCursor;
 
-            using (DataTarget dataTarget = DataTarget.AttachToProcess(process.Id, dataTargetTimeOut, dataTargetAttachFlag))
+            using (DataTarget dataTarget = DataTarget.AttachToProcess(Process.Id, dataTargetTimeOut, dataTargetAttachFlag))
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
                 ClrRuntime runtime = clrVersion.CreateRuntime();
@@ -724,8 +761,9 @@ namespace MemoryDiagnostics
                     {
                         foreach (DataGridViewRow row in dataGridViewMain.SelectedRows)
                         {
+                            int cnt = 0;
                             ManagedObject m = row.DataBoundItem as ManagedObject;
-                            
+
                             writer.WriteLine("*********************** {0} ************************", m.ObjectName);
                             writer.WriteLine();
 
@@ -735,41 +773,19 @@ namespace MemoryDiagnostics
 
                                 if (type == null || type.Name != m.ObjectName)
                                     continue;
-
-                                 writer.WriteLine("{1} {0:X}", ptr, m.ObjectName);
-                                foreach (ClrInstanceField f in type.Fields)
-                                {
-                                    object value = f.GetValue(ptr);                                   
-
-                                    if ((f.IsObjectReference || f.ElementType == ClrElementType.Struct) && f.ElementType != ClrElementType.String)
-                                    {
-                                        value = String.Format("{1} {0:X}", f.GetAddress(ptr), f.ElementType);
-
-                                        if (f.ElementType == ClrElementType.Struct && f.Type.Name == "System.DateTime")
-                                        {
-                                            foreach (ClrInstanceField fd in f.Type.Fields)
-                                                if (fd.Name == "dateData")
-                                                {
-                                                    //https://stackoverflow.com/questions/10759287/interpret-uint64-datedata-in-net-datetime-structure
-                                                    //http://www.dotnetframework.org/default.aspx/DotNET/DotNET/8@0/untmp/whidbey/REDBITS/ndp/clr/src/BCL/System/DateTime@cs/1/DateTime@cs
-                                                    UInt64 dateData = (UInt64)fd.GetValue(fd.GetAddress(ptr));
-                                                    Int64 ticks = (Int64)(dateData & (UInt64)0x3FFFFFFFFFFFFFFF);
-                                                    //TODO klappt nicht so recht
-                                                    //value = DateTime.FromBinary(ticks);
-                                                }
-
-                                        }
-                                    }
-                                    writer.WriteLine("\t{0}: {1} [{2}]", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value, f.Type.Name);                                    
-                                }
+                                
+                                writer.WriteLine(ClrMdHelper.GetInfoOfObject(runtime, ptr, type));
                                 writer.WriteLine();
+                                cnt++;
                             }
+                            writer.WriteLine("{0}x found in Heap {1}", cnt, m.ObjectName);
+                            writer.WriteLine();
                             writer.WriteLine();
                         }
                     }
                 }
             }
             Cursor.Current = Cursors.Default;
-        }
+        }       
     }
 }

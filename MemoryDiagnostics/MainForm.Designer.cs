@@ -87,6 +87,7 @@
             this.buttonStrings = new System.Windows.Forms.Button();
             this.saveFileDialogStrings = new System.Windows.Forms.SaveFileDialog();
             this.saveFileDialogObjects = new System.Windows.Forms.SaveFileDialog();
+            this.openInObjectInspectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
             this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
@@ -182,9 +183,10 @@
             this.clearFilterToolStripMenuItem,
             this.copyObjectNameToolStripMenuItem,
             this.walkTheHeapToolStripMenuItem,
+            this.openInObjectInspectorToolStripMenuItem,
             this.objectOverviewToolStripMenuItem});
             this.contextMenuStripMemoryObjects.Name = "contextMenuStripMeomoryObjects";
-            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(243, 136);
+            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(243, 158);
             // 
             // filterForSelectedTypesToolStripMenuItem
             // 
@@ -539,6 +541,13 @@
             this.saveFileDialogObjects.Filter = "text file |*.txt";
             this.saveFileDialogObjects.Title = "Write Field Info of all Objects";
             // 
+            // openInObjectInspectorToolStripMenuItem
+            // 
+            this.openInObjectInspectorToolStripMenuItem.Name = "openInObjectInspectorToolStripMenuItem";
+            this.openInObjectInspectorToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.openInObjectInspectorToolStripMenuItem.Text = "Open in Object Inspector";
+            this.openInObjectInspectorToolStripMenuItem.Click += new System.EventHandler(this.openInObjectInspectorToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -624,6 +633,7 @@
         private System.Windows.Forms.ToolStripMenuItem objectOverviewToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialogObjects;
         private System.Windows.Forms.ToolStripMenuItem walkTheHeapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openInObjectInspectorToolStripMenuItem;
     }
 }
 

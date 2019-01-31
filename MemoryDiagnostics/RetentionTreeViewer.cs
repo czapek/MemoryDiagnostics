@@ -23,7 +23,7 @@ namespace MemoryDiagnostics
             InitializeComponent();
         }
 
-        public RetentionTreeViewer(ClrRuntime runtime, String objectName)
+        public RetentionTreeViewer(ClrRuntime runtime, List<String> managedObjects)
         {
             this.runtime = runtime;
             InitializeComponent();
@@ -32,13 +32,29 @@ namespace MemoryDiagnostics
 
             if (runtime != null)
             {
-                List<ClrTypeHelper> c = ClrMdHelper.GetPtrsForObjectName(runtime, objectName);
+                Cursor.Current = Cursors.WaitCursor;
+                List<ClrTypeHelper> c = new List<ClrTypeHelper>();
+                foreach (String s in managedObjects)
+                    c.AddRange(ClrMdHelper.GetPtrsForObjectName(runtime, s));
+
                 comboBoxClrMdTypes.Items.AddRange(c.ToArray());
+
+                Cursor.Current = Cursors.Default;
             }
             else
-            {     
-                    openFileDialog();
+            {
+                openFileDialog();
             }
+        }
+
+        public RetentionTreeViewer(ClrRuntime runtime, ulong ptr)
+        {
+            this.runtime = runtime;
+            InitializeComponent();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+
+            openTreeFromPtr(ptr);
         }
 
         private void AddNodesRecursive(ClrTypeHelper root, TreeNodeCollection nodes)
@@ -143,25 +159,41 @@ namespace MemoryDiagnostics
 
         private void comboBoxClrMdTypes_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter)
+            if (e.KeyCode == Keys.Enter)
             {
                 ulong ptr;
-                if(ulong.TryParse(comboBoxClrMdTypes.Text, NumberStyles.HexNumber,  CultureInfo.CurrentCulture,   out ptr))
+                if (runtime != null && ulong.TryParse(comboBoxClrMdTypes.Text, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ptr))
                 {
-                    ClrType type = runtime.Heap.GetObjectType(ptr);
-                    if (type != null)
-                    {
-                        ClrTypeHelper clrTypeHelper = new ClrTypeHelper()
-                        {
-                            Ptr = ptr,
-                            Name = type.Name,
-                            Size = type.GetSize(ptr)
-                        };
+                    openTreeFromPtr(ptr);
+                }
+            }
+        }
 
-                        comboBoxClrMdTypes.Items.Add(clrTypeHelper);
-                        comboBoxClrMdTypes.SelectedIndex = comboBoxClrMdTypes.Items.Count - 1;
-                    }
-                }      
+        private void openTreeFromPtr(ulong ptr)
+        {
+            if (ptr == 0)
+                return;
+
+            ClrTypeHelper clr = comboBoxClrMdTypes.Items.Cast<ClrTypeHelper>().FirstOrDefault(x => x.Ptr == ptr);
+
+            if(clr != null)
+            {
+                comboBoxClrMdTypes.SelectedItem = clr;
+                return;
+            }
+
+            ClrType type = runtime.Heap.GetObjectType(ptr);
+            if (type != null)
+            {
+                ClrTypeHelper clrTypeHelper = new ClrTypeHelper()
+                {
+                    Ptr = ptr,
+                    Name = type.Name,
+                    Size = type.GetSize(ptr)
+                };
+
+                comboBoxClrMdTypes.Items.Add(clrTypeHelper);
+                comboBoxClrMdTypes.SelectedIndex = comboBoxClrMdTypes.Items.Count - 1;
             }
         }
     }

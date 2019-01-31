@@ -27,7 +27,7 @@ namespace MemoryDiagnostics
                         Ptr = ptr,
                         Name = type.Name,
                         Size = type.GetSize(ptr)
-                    });    
+                    });
                 }
             }
 
@@ -35,7 +35,7 @@ namespace MemoryDiagnostics
         }
 
         public static void BuildFullRetentionTree(ClrRuntime runtime, ClrTypeHelper clrTypeHelper)
-        {           
+        {
             Stack<ulong> stack = new Stack<ulong>();
             foreach (var root in runtime.Heap.EnumerateRoots())
             {
@@ -44,7 +44,7 @@ namespace MemoryDiagnostics
                 ClrTypeHelper lastCrlTypeHelper = clrTypeHelper;
 
                 if (GetPathToObject(runtime.Heap, clrTypeHelper.Ptr, stack, new HashSet<ulong>()))
-                {    
+                {
                     foreach (var address in stack)
                     {
                         var t = runtime.Heap.GetObjectType(address);
@@ -57,7 +57,7 @@ namespace MemoryDiagnostics
 
                         if (clrTypeHelper.Ptr == address)
                             continue;
-                       
+
                         ClrTypeHelper c = new ClrTypeHelper()
                         {
                             Ptr = address,
@@ -74,8 +74,8 @@ namespace MemoryDiagnostics
                         {
                             lastCrlTypeHelper.Parents.Add(c);
                             lastCrlTypeHelper = c;
-                        }                   
-                    }            
+                        }
+                    }
                 }
             }
         }
@@ -125,5 +125,55 @@ namespace MemoryDiagnostics
 
             return found;
         }
+
+        public static string GetInfoOfObject(ClrRuntime runtime, ulong ptr, ClrType type)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (type == null)
+                type = runtime.Heap.GetObjectType(ptr);
+
+            sb.AppendFormat("{1} {0:X}\r\n", ptr, type.Name);
+
+            foreach (ClrInstanceField f in type.Fields)
+            {
+                object value = "?";
+                if (f.ElementType != ClrElementType.Unknown)
+                {
+                    value = f.GetValue(ptr);
+
+                    if (f.ElementType == ClrElementType.Object)
+                    {
+
+                    }
+
+                    if (f.ElementType == ClrElementType.Struct)
+                    {
+
+                    }
+
+                    if ((f.IsObjectReference || f.ElementType == ClrElementType.Struct) && f.ElementType != ClrElementType.String)
+                    {
+                        value = String.Format("{1} {0:X}", f.GetAddress(ptr), f.ElementType);
+
+                        if (f.ElementType == ClrElementType.Struct && f.Type.Name == "System.DateTime")
+                        {
+                            foreach (ClrInstanceField fd in f.Type.Fields)
+                                if (fd.Name == "dateData")
+                                {
+                                    //https://stackoverflow.com/questions/10759287/interpret-uint64-datedata-in-net-datetime-structure
+                                    //http://www.dotnetframework.org/default.aspx/DotNET/DotNET/8@0/untmp/whidbey/REDBITS/ndp/clr/src/BCL/System/DateTime@cs/1/DateTime@cs
+                                    UInt64 dateData = (UInt64)fd.GetValue(fd.GetAddress(ptr));
+                                    Int64 ticks = (Int64)(dateData & (UInt64)0x3FFFFFFFFFFFFFFF);
+                                    //TODO klappt nicht so recht
+                                    //value = DateTime.FromBinary(ticks);
+                                }
+
+                        }
+                    }
+                }
+                sb.AppendFormat("\t{0}: {1} [{2}]\r\n", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value, f.Type.Name);
+            }
+            return sb.ToString();
+        }      
     }
 }
