@@ -143,35 +143,37 @@ namespace MemoryDiagnostics
 
                     if (f.ElementType == ClrElementType.Object)
                     {
-
+                        if ((UInt64)value == 0)
+                            value = "ref null";
+                        else
+                            value = "ref " + ((UInt64)value).ToString("X");
+                        //ClrType refType = runtime.Heap.GetObjectType((UInt64)value);
                     }
 
                     if (f.ElementType == ClrElementType.Struct)
                     {
-
-                    }
-
-                    if ((f.IsObjectReference || f.ElementType == ClrElementType.Struct) && f.ElementType != ClrElementType.String)
-                    {
-                        value = String.Format("{1} {0:X}", f.GetAddress(ptr), f.ElementType);
-
-                        if (f.ElementType == ClrElementType.Struct && f.Type.Name == "System.DateTime")
+                        foreach (ClrInstanceField fs in f.Type.Fields)
                         {
-                            foreach (ClrInstanceField fd in f.Type.Fields)
-                                if (fd.Name == "dateData")
-                                {
-                                    //https://stackoverflow.com/questions/10759287/interpret-uint64-datedata-in-net-datetime-structure
-                                    //http://www.dotnetframework.org/default.aspx/DotNET/DotNET/8@0/untmp/whidbey/REDBITS/ndp/clr/src/BCL/System/DateTime@cs/1/DateTime@cs
-                                    UInt64 dateData = (UInt64)fd.GetValue(fd.GetAddress(ptr));
-                                    Int64 ticks = (Int64)(dateData & (UInt64)0x3FFFFFFFFFFFFFFF);
-                                    //TODO klappt nicht so recht
-                                    //value = DateTime.FromBinary(ticks);
-                                }
-
+                            //TODO struct?
+                            value = "struct";
                         }
+
+                        //    if (f.ElementType == ClrElementType.Struct && f.Type.Name == "System.DateTime")
+                        //    {
+                        //        foreach (ClrInstanceField fd in f.Type.Fields)
+                        //            if (fd.Name == "dateData")
+                        //            {
+                        //                //https://stackoverflow.com/questions/10759287/interpret-uint64-datedata-in-net-datetime-structure
+                        //                //http://www.dotnetframework.org/default.aspx/DotNET/DotNET/8@0/untmp/whidbey/REDBITS/ndp/clr/src/BCL/System/DateTime@cs/1/DateTime@cs
+                        //                UInt64 dateData = (UInt64)fd.GetValue(fd.GetAddress(ptr));
+                        //                Int64 ticks = (Int64)(dateData & (UInt64)0x3FFFFFFFFFFFFFFF);
+                        //                //TODO klappt nicht so recht
+                        //                //value = DateTime.FromBinary(ticks);
+                        //            }
+                        //    }
                     }
                 }
-                sb.AppendFormat("\t{0}: {1} [{2}]\r\n", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value, f.Type.Name);
+                sb.AppendFormat("\t{0}: {1} [{2}]\r\n", f.Name.StartsWith("<") ? f.Name.Replace(">k__BackingField", "").TrimStart('<') : f.Name, value == null ? "null" : value, f.Type.Name);
             }
             return sb.ToString();
         }      

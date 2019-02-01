@@ -27,7 +27,7 @@ namespace MemoryDiagnostics
                 {
                     List<Process> allProcesses = Process.GetProcesses().Where(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim())).ToArray().ToList();
                     process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process
-                    if (Process == null)
+                    if (process == null)
                         process = allProcesses.FirstOrDefault();
                 }
                 return process;
