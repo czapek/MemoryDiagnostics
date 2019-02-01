@@ -23,7 +23,7 @@ namespace MemoryDiagnostics
         {
             get
             {
-                if(process == null || process.HasExited)
+                if (process == null || process.HasExited)
                 {
                     List<Process> allProcesses = Process.GetProcesses().Where(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim())).ToArray().ToList();
                     process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process
@@ -87,7 +87,7 @@ namespace MemoryDiagnostics
                 Snapshot snapshot = new Snapshot() { MemoryPrivateBytes = Process.PrivateMemorySize64, Date = DateTime.Now, Position = Snapshots.Count };
                 Snapshots.Add(snapshot);
                 snapshotPosition = Snapshots.Count - 1;
-                snapshot.Comment = snapshotPosition + ". Snapshot Comment: ";
+                snapshot.Comment = snapshotPosition + ". Snapshot: ";
                 richTextBoxComment.Text = snapshot.Comment;
                 CollectMemory(runtime, snapshot);
                 snapshot.ManagedObjectDic = ListObjects(runtime);
@@ -429,6 +429,13 @@ namespace MemoryDiagnostics
                 Snapshot selected = dataGridViewSnapshot.SelectedRows[0].DataBoundItem as Snapshot;
                 int index = Snapshots.FindIndex(x => x.Date == selected.Date);
                 Snapshots.RemoveAt(index);
+
+                for (int i = 0; i < Snapshots.Count; i++)
+                    Snapshots[i].Position = i;
+
+                snapshotPosition = Snapshots.Count - 1;
+                this.Text = "Snapshot deleted";
+
                 bindingSourceSnapshot.DataSource = null;
                 bindingSourceSnapshot.DataSource = Snapshots;
             }
@@ -510,6 +517,7 @@ namespace MemoryDiagnostics
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
                     Snapshots = (List<Snapshot>)formatter.Deserialize(readerFileStream);
+
                     if (Snapshots.Count > 0)
                         RefreshSnapshotGrid(Snapshots[Snapshots.Count - 1]);
                 }
@@ -773,7 +781,7 @@ namespace MemoryDiagnostics
 
                                 if (type == null || type.Name != m.ObjectName)
                                     continue;
-                                
+
                                 writer.WriteLine(ClrMdHelper.GetInfoOfObject(runtime, ptr, type));
                                 writer.WriteLine();
                                 cnt++;
@@ -786,6 +794,6 @@ namespace MemoryDiagnostics
                 }
             }
             Cursor.Current = Cursors.Default;
-        }       
+        }
     }
 }
