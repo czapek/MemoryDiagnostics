@@ -23,10 +23,10 @@ namespace MemoryDiagnostics
         {
             get
             {
-                if (process == null || process.HasExited)
+                if (textBoxProcessFilter.Text.Trim().Length > 0 && (process == null || process.HasExited))
                 {
                     List<Process> allProcesses = Process.GetProcesses().Where(p => p.ProcessName.Contains(textBoxProcessFilter.Text.Trim())).ToArray().ToList();
-                    process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process
+                    process = allProcesses.FirstOrDefault(p => !p.ProcessName.Contains("vshost"));//avoid VisualStudio Host Process     
                     if (process == null)
                         process = allProcesses.FirstOrDefault();
                 }
@@ -80,6 +80,9 @@ namespace MemoryDiagnostics
 
         private void CreateManagedObjects()
         {
+            if (Process == null)
+                return;
+
             using (DataTarget dataTarget = DataTarget.AttachToProcess(Process.Id, dataTargetTimeOut, dataTargetAttachFlag))
             {
                 ClrInfo clrVersion = dataTarget.ClrVersions.First();
@@ -423,6 +426,11 @@ namespace MemoryDiagnostics
         }
 
         private void deleteThisSnapshotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeleteSnapshot();
+        }
+
+        private void DeleteSnapshot()
         {
             if (dataGridViewSnapshot.SelectedRows.Count > 0)
             {
@@ -794,6 +802,14 @@ namespace MemoryDiagnostics
                 }
             }
             Cursor.Current = Cursors.Default;
+        }
+
+        private void dataGridViewSnapshot_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                DeleteSnapshot();
+            }
         }
     }
 }

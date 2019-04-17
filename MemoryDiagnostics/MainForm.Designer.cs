@@ -53,6 +53,7 @@
             this.clearFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyObjectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.walkTheHeapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openInObjectInspectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.objectOverviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bindingSourceMain = new System.Windows.Forms.BindingSource(this.components);
             this.buttonNext = new System.Windows.Forms.Button();
@@ -87,7 +88,6 @@
             this.buttonStrings = new System.Windows.Forms.Button();
             this.saveFileDialogStrings = new System.Windows.Forms.SaveFileDialog();
             this.saveFileDialogObjects = new System.Windows.Forms.SaveFileDialog();
-            this.openInObjectInspectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewMain)).BeginInit();
             this.contextMenuStripMemoryObjects.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSourceMain)).BeginInit();
@@ -186,40 +186,47 @@
             this.openInObjectInspectorToolStripMenuItem,
             this.objectOverviewToolStripMenuItem});
             this.contextMenuStripMemoryObjects.Name = "contextMenuStripMeomoryObjects";
-            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(243, 158);
+            this.contextMenuStripMemoryObjects.Size = new System.Drawing.Size(244, 136);
             // 
             // filterForSelectedTypesToolStripMenuItem
             // 
             this.filterForSelectedTypesToolStripMenuItem.Name = "filterForSelectedTypesToolStripMenuItem";
-            this.filterForSelectedTypesToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.filterForSelectedTypesToolStripMenuItem.Size = new System.Drawing.Size(243, 22);
             this.filterForSelectedTypesToolStripMenuItem.Text = "Add selected types to filter";
             this.filterForSelectedTypesToolStripMenuItem.Click += new System.EventHandler(this.filterForSelectedTypesToolStripMenuItem_Click);
             // 
             // clearFilterToolStripMenuItem
             // 
             this.clearFilterToolStripMenuItem.Name = "clearFilterToolStripMenuItem";
-            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.clearFilterToolStripMenuItem.Size = new System.Drawing.Size(243, 22);
             this.clearFilterToolStripMenuItem.Text = "Clear Filter";
             this.clearFilterToolStripMenuItem.Click += new System.EventHandler(this.clearFilterToolStripMenuItem_Click);
             // 
             // copyObjectNameToolStripMenuItem
             // 
             this.copyObjectNameToolStripMenuItem.Name = "copyObjectNameToolStripMenuItem";
-            this.copyObjectNameToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.copyObjectNameToolStripMenuItem.Size = new System.Drawing.Size(243, 22);
             this.copyObjectNameToolStripMenuItem.Text = "Copy this Type Name";
             this.copyObjectNameToolStripMenuItem.Click += new System.EventHandler(this.copyObjectNameToolStripMenuItem_Click);
             // 
             // walkTheHeapToolStripMenuItem
             // 
             this.walkTheHeapToolStripMenuItem.Name = "walkTheHeapToolStripMenuItem";
-            this.walkTheHeapToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.walkTheHeapToolStripMenuItem.Size = new System.Drawing.Size(243, 22);
             this.walkTheHeapToolStripMenuItem.Text = "Open Retention Tree Viewer";
             this.walkTheHeapToolStripMenuItem.Click += new System.EventHandler(this.walkTheHeapToolStripMenuItem_Click);
+            // 
+            // openInObjectInspectorToolStripMenuItem
+            // 
+            this.openInObjectInspectorToolStripMenuItem.Name = "openInObjectInspectorToolStripMenuItem";
+            this.openInObjectInspectorToolStripMenuItem.Size = new System.Drawing.Size(243, 22);
+            this.openInObjectInspectorToolStripMenuItem.Text = "Open in Object Inspector";
+            this.openInObjectInspectorToolStripMenuItem.Click += new System.EventHandler(this.openInObjectInspectorToolStripMenuItem_Click);
             // 
             // objectOverviewToolStripMenuItem
             // 
             this.objectOverviewToolStripMenuItem.Name = "objectOverviewToolStripMenuItem";
-            this.objectOverviewToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
+            this.objectOverviewToolStripMenuItem.Size = new System.Drawing.Size(243, 22);
             this.objectOverviewToolStripMenuItem.Text = "Save Field Overview of this Type";
             this.objectOverviewToolStripMenuItem.Click += new System.EventHandler(this.objectOverviewToolStripMenuItem_Click);
             // 
@@ -313,6 +320,7 @@
             this.dataGridViewSnapshot.TabIndex = 5;
             this.dataGridViewSnapshot.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridViewSnapshot_CellFormatting);
             this.dataGridViewSnapshot.DoubleClick += new System.EventHandler(this.dataGridViewSnapshot_DoubleClick);
+            this.dataGridViewSnapshot.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridViewSnapshot_KeyDown);
             this.dataGridViewSnapshot.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridViewSnapshot_MouseDown);
             // 
             // Snapshot
@@ -540,13 +548,6 @@
             // 
             this.saveFileDialogObjects.Filter = "text file |*.txt";
             this.saveFileDialogObjects.Title = "Write Field Info of all Objects";
-            // 
-            // openInObjectInspectorToolStripMenuItem
-            // 
-            this.openInObjectInspectorToolStripMenuItem.Name = "openInObjectInspectorToolStripMenuItem";
-            this.openInObjectInspectorToolStripMenuItem.Size = new System.Drawing.Size(242, 22);
-            this.openInObjectInspectorToolStripMenuItem.Text = "Open in Object Inspector";
-            this.openInObjectInspectorToolStripMenuItem.Click += new System.EventHandler(this.openInObjectInspectorToolStripMenuItem_Click);
             // 
             // MainForm
             // 
