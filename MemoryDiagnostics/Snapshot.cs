@@ -10,7 +10,7 @@ namespace MemoryDiagnostics
     public class Snapshot
     {
         public SortedDictionary<string, ManagedObject> ManagedObjectDic { get; set; }
-        public int ObjectCount { get { return ManagedObjectDic.Count; } }
+        public int ObjectCount { get { return ManagedObjectDic.Sum(x => x.Value.ObjectCount); } }
         public int Position { get; set; }
         public String Comment { get; set; }
         public ulong MemoryEphemeral { get; set; }
@@ -23,7 +23,7 @@ namespace MemoryDiagnostics
 
         public override string ToString()
         {
-            return Position + ". " +  Date.ToString("HH:mm:ss") + " " + Comment;
+            return Position + ". " + Date.ToString("HH:mm:ss") + " " + Comment;
         }
     }
 }
